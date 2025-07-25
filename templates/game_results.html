@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .results-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00b4db, #0083b0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            color: white;
+            font-size: 2.5em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .accuracy {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .accuracy span {
+            color: #0083b0;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: #0083b0;
+            margin-bottom: 15px;
+        }
+
+        .mistakes-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .mistake-item {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .suggestion-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            color: #0083b0;
+        }
+
+        .suggestions {
+            margin: 30px 0;
+        }
+
+        .suggestion-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .suggestion-item:before {
+            content: '💡';
+            margin-right: 10px;
+        }
+
+        .buttons {
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00b4db, #0083b0);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 131, 176, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0083b0;
+            border: 2px solid #0083b0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 131, 176, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <h1 style="color: #2c3e50; font-size: 2.5em; margin-bottom: 30px;">Quiz Results 🎓</h1>
+        
+        <div class="score-circle">
+            {{ score }}/{{ total_questions }}
+        </div>
+
+        <div class="accuracy">
+            Accuracy: <span>{{ "%.1f"|format(accuracy) }}%</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Performance 📊</h3>
+                {% if accuracy >= 80 %}
+                    <p>Outstanding! You've demonstrated excellent understanding.</p>
+                {% elif accuracy >= 60 %}
+                    <p>Good progress! Keep practicing to improve further.</p>
+                {% else %}
+                    <p>Keep practicing! Every attempt helps you learn.</p>
+                {% endif %}
+            </div>
+            
+            <div class="stat-card">
+                <h3>Statistics 📈</h3>
+                <p>Total Questions: {{ total_questions }}<br>
+                   Correct Answers: {{ score }}<br>
+                   Incorrect Answers: {{ total_questions - score }}</p>
+            </div>
+        </div>
+
+        {% if incorrect_answers %}
+        <div class="mistakes-section">
+            <h3 style="color: #2c3e50;">Review Your Mistakes:</h3>
+            {% for mistake in incorrect_answers %}
+            <div class="mistake-item">
+                <p><strong>Character:</strong> {{ mistake.character }}</p>
+                <p><strong>Your Answer:</strong> {{ mistake.user_answer }}</p>
+                <p><strong>Correct Answer:</strong> {{ mistake.correct_answer }}</p>
+                <div class="suggestion-box">
+                    💡 Practice Tip: Try saying "{{ mistake.correct_answer }}" for "{{ mistake.character }}" slowly and listen to the pronunciation multiple times.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="suggestions">
+            <h3 style="color: #2c3e50;">Improvement Suggestions:</h3>
+            <div class="suggestion-item">
+                Listen to each pronunciation multiple times before answering
+            </div>
+            <div class="suggestion-item">
+                Practice speaking the sounds out loud after hearing them
+            </div>
+            <div class="suggestion-item">
+                Focus on the characters you found challenging
+            </div>
+            {% if accuracy < 60 %}
+            <div class="suggestion-item">
+                Start with basic vowel sounds before moving to consonants
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="buttons">
+            <a href="{{ url_for('game') }}" class="btn btn-primary">Try Another Quiz 🔄</a>
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home 🏠</a>
+        </div>
+    </div>
+</body>
+</html>
