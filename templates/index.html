@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PolyLinguaBot - Learn Indian Languages</title>
+    <!--link rel="stylesheet" href="style.css"-->
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #f8fafc, #e0f7fa);
+        }
+        header {
+            background-color: #0077b6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            background: #023e8a;
+            padding: 10px 30px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+        }
+        nav a:hover {
+            background: #0077b6;
+            border-radius: 5px;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 30px;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: 1.2em;
+            color: #555;
+        }
+        .cta {
+            margin-top: 30px;
+        }
+        .cta a {
+            background: #0077b6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .cta a:hover {
+            background: #023e8a;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #caf0f8;
+            color: #023e8a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>VaaniMitra: Interactive Multilingual Tutor for Indian Regional Languages</h1>
+        <p>AI Chatbot for Learning Indian Languages</p>
+    </header>
+
+    <nav>
+        <div>
+            <a href="/">Home</a>
+            <a href="#features">Features</a>
+            <a href="#languages">Languages</a>
+            <a href="{{ url_for('game') }}">Practice Game</a>
+        </div>
+        <div>
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Learn Indian Languages Easily</h1>
+        <p>Practice vocabulary, pronunciation, and conversations with our smart AI-powered chatbot.</p>
+        <div class="cta">
+            <a href="{{ url_for('signup') }}">Get Started</a>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2025 PolyLinguaBot. All rights reserved.
+    </footer>
+</body>
+</html>
