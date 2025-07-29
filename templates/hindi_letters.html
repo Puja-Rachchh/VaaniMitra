@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hindi Letters - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .letter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .letter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .letter {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .letter-name {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hindi Letters (वर्णमाला)</h1>
+        <div class="letters-grid" id="lettersGrid">
+            <!-- Letters will be added dynamically via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const hindiLetters = [
+            { letter: 'अ', name: 'a' },
+            { letter: 'आ', name: 'aa' },
+            { letter: 'इ', name: 'e' },
+            { letter: 'ई', name: 'ee' },
+            { letter: 'उ', name: 'u' },
+            { letter: 'ऊ', name: 'oo' },
+            { letter: 'ए', name: 'ae' },
+            { letter: 'ऐ', name: 'ai' },
+            { letter: 'ओ', name: 'o' },
+            { letter: 'औ', name: 'au' },
+            { letter: 'अं', name: 'an' },
+            { letter: 'अः', name: 'aha' },
+            { letter: 'क', name: 'Ka' },
+            { letter: 'ख', name: 'Kha' },
+            { letter: 'ग', name: 'Ga' },
+            { letter: 'घ', name: 'Gha' },
+            { letter: 'ङ', name: 'Nga' },
+            { letter: 'च', name: 'Cha' },
+            { letter: 'छ', name: 'Chha' },
+            { letter: 'ज', name: 'Ja' },
+            { letter: 'झ', name: 'Jha' },
+            { letter: 'ञ', name: 'Nya' },
+            { letter: 'ट', name: 'Ta' },
+            { letter: 'ठ', name: 'Tha' },
+            { letter: 'ड', name: 'Da' },
+            { letter: 'ढ', name: 'Dha' },
+            { letter: 'ण', name: 'Na' },
+            { letter: 'त', name: 'Ta' },
+            { letter: 'थ', name: 'Tha' },
+            { letter: 'द', name: 'Da' },
+            { letter: 'ध', name: 'Dha' },
+            { letter: 'न', name: 'Na' },
+            { letter: 'प', name: 'Pa' },
+            { letter: 'फ', name: 'Pha' },
+            { letter: 'ब', name: 'Ba' },
+            { letter: 'भ', name: 'Bha' },
+            { letter: 'म', name: 'Ma' },
+            { letter: 'य', name: 'Ya' },
+            { letter: 'र', name: 'Ra' },
+            { letter: 'ल', name: 'La' },
+            { letter: 'व', name: 'Va' },
+            { letter: 'श', name: 'Sha' },
+            { letter: 'ष', name: 'Sha' },
+            { letter: 'स', name: 'Sa' },
+            { letter: 'ह', name: 'Ha' },
+            { letter : 'क्ष', name: 'Ksha' },
+            { letter: 'त्र', name: 'Tra' },
+            { letter: 'ज्ञ', name: 'Gya' }
+        ];
+
+        function createLetterCards() {
+            const grid = document.getElementById('lettersGrid');
+            
+            hindiLetters.forEach(({ letter, name }) => {
+                const card = document.createElement('div');
+                card.className = 'letter-card';
+                card.innerHTML = `
+                    <div class="letter">${letter}</div>
+                    <div class="letter-name">${name}</div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    playLetterSound(letter);  // Use the Hindi name (e.g., अकार, ककार) for pronunciation
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+
+        async function playLetterSound(letter) {
+            try {
+                const response = await fetch('/play_hindi_letter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ letter: letter })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                await audio.play();
+                
+                // Clean up after playing
+                audio.onended = () => {
+                    URL.revokeObjectURL(audioUrl);
+                };
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                alert('Error playing sound');
+            }
+        }
+
+        // Initialize the grid when the page loads
+        createLetterCards();
+    </script>
+</body>
+</html>

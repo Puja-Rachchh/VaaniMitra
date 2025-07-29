@@ -24,6 +24,58 @@ def home():
         return render_template('index.html', username=user.username, known=user.known_language, target=user.target_language, level=user.level)
     return redirect(url_for('login'))
 
+@app.route('/hindi_letters')
+def hindi_letters():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user.target_language != 'Hindi' or user.level != 'Beginner':
+        return redirect(url_for('home'))
+    return render_template('hindi_letters.html')
+
+@app.route('/play_hindi_letter', methods=['POST'])
+def play_hindi_letter():
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    letter = data.get('letter')
+    
+    if not letter:
+        return jsonify({'error': 'No letter provided'}), 400
+    
+    try:
+        # Create a temporary file
+        import tempfile
+        import os
+        
+        # Create gTTS object with Hindi language
+        tts = gTTS(text=letter, lang='hi')
+        
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
+            # Save the audio to the temporary file
+            tts.save(temp_file.name)
+            temp_path = temp_file.name
+        
+        # Send the file
+        @after_this_request
+        def remove_file(response):
+            try:
+                os.remove(temp_path)
+            except Exception as e:
+                print(f"Error removing temporary file: {e}")
+            return response
+        
+        return send_file(
+            temp_path,
+            mimetype='audio/mpeg',
+            as_attachment=False
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -81,10 +133,29 @@ def language_selection():
         user.level = level
         db.session.commit()
 
-        # Redirect to game page instead of home
-        return redirect(url_for('game'))
+        if target == 'Hindi' and level == 'Beginner':
+            return redirect(url_for('beginner_choice'))
+        return redirect(url_for('home'))
 
     return render_template('language_selection.html')
+
+@app.route('/beginner-choice')
+def beginner_choice():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user.target_language != 'Hindi' or user.level != 'Beginner':
+        return redirect(url_for('home'))
+    return render_template('beginner_choice.html')
+
+@app.route('/beginner-quiz')
+def beginner_quiz():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user.target_language != 'Hindi' or user.level != 'Beginner':
+        return redirect(url_for('home'))
+    return redirect(url_for('game'))
 
 @app.route('/generate-audio', methods=['GET'])
 def generate_audio():
