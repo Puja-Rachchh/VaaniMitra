@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Beginner Learning Path - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .choice-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .choice-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            width: 200px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Learning Path</h1>
+        <div class="choice-container">
+            <a href="{{ url_for('hindi_letters') }}" class="choice-card">
+                <div class="icon">📚</div>
+                <div class="title">Learn Letters</div>
+                <div class="description">Start with basic Hindi letters and their pronunciations</div>
+            </a>
+            <a href="{{ url_for('beginner_quiz') }}" class="choice-card">
+                <div class="icon">✍️</div>
+                <div class="title">Take Quiz</div>
+                <div class="description">Test your knowledge of Hindi letters</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
