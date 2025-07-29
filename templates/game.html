@@ -256,8 +256,11 @@
             }
 
             // Check for game over conditions
-            if (result.game_over) {
-                // Clear the game container and show completion message with progress button
+            if (result.game_over && result.redirect_url) {
+                // Wait a moment to show the last answer result, then redirect to results page
+                setTimeout(() => {
+                    window.location.href = result.redirect_url;
+                }, 1500);
                 const gameContainer = document.querySelector('.game-container');
                 gameContainer.innerHTML = `
                     <div style="text-align: center;">
