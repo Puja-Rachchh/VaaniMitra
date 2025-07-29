@@ -2,10 +2,13 @@ from flask import render_template, request, jsonify, send_file, session, redirec
 from app import app
 import os
 import random
+from flask_login import login_required, current_user
 
 @app.route('/game')
+@login_required
 def game():
-    if 'user' not in session:
+    # login_required will automatically redirect to login if user is not authenticated
+    if not current_user.is_authenticated:
         return redirect(url_for('login'))
     
     # Hindi characters and their pronunciations
@@ -165,20 +168,21 @@ def play_sound():
 
 @app.route('/game_results')
 def game_results():
-    if 'game_data' not in session:
+    if 'final_results' not in session:
         return redirect(url_for('game'))
     
-    # Calculate results
-    game_data = session['game_data']
-    accuracy = (game_data['score'] / game_data['total_questions']) * 100
+    # Get the results from the session
+    results = session['final_results']
     
-    # Get the results before clearing the session
-    results = {
-        'score': game_data['score'],
-        'total_questions': game_data['total_questions'],
-        'accuracy': accuracy,
-        'incorrect_answers': game_data['incorrect_answers']
-    }
+    # Clear the results after displaying
+    session.pop('final_results', None)
+    
+    return render_template('game_results.html',
+                         score=results['score'],
+                         total_questions=results['total_questions'],
+                         accuracy=results['accuracy'],
+                         incorrect_answers=results.get('incorrect_answers', []))
+    
     
     # Clear the game data for the next game
     session.pop('game_data', None)
@@ -233,19 +237,21 @@ def check_answer():
 
     if game_over:
         accuracy = (session['game_data']['score'] / session['game_data']['total_questions']) * 100
-        # Store final results before clearing game data
-        final_results = {
-            'correct': is_correct,
-            'lives': session['game_data']['lives'],
+        # Store final results in session for the results page
+        session['final_results'] = {
             'score': session['game_data']['score'],
-            'game_over': True,
-            'accuracy': accuracy,
             'total_questions': session['game_data']['total_questions'],
+            'accuracy': accuracy,
             'incorrect_answers': session['game_data']['incorrect_answers']
         }
         # Clear the game data for next game
         session.pop('game_data', None)
-        return jsonify(final_results)
+        # Return response with redirect URL
+        return jsonify({
+            'correct': is_correct,
+            'game_over': True,
+            'redirect_url': url_for('game_results')
+        })
 
     return jsonify({
         'correct': is_correct,
