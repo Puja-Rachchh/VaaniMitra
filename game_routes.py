@@ -2,10 +2,13 @@ from flask import render_template, request, jsonify, send_file, session, redirec
 from app import app
 import os
 import random
+from flask_login import login_required, current_user
 
 @app.route('/game')
+@login_required
 def game():
-    if 'user' not in session:
+    # login_required will automatically redirect to login if user is not authenticated
+    if not current_user.is_authenticated:
         return redirect(url_for('login'))
     
     # Hindi characters and their pronunciations

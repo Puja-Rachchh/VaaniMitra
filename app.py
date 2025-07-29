@@ -1,11 +1,17 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 import os
 import secrets
 
 app = Flask(__name__)
 #secret_key = secrets.token_hex(16) # Generates a 32-character hexadecimal string
 app.secret_key = 'fkeifhei46ngjrn'
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # Specify the login route name
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
