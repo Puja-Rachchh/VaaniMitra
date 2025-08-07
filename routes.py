@@ -109,10 +109,12 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
+            session['user'] = user.username  # Ensure session variable is set
             # If user was redirected to login from game route, send them back there
             next_page = request.args.get('next')
             if next_page:
                 return redirect(next_page)
+            print("Login Successful")
             return redirect(url_for('language_selection'))
         return "Invalid credentials."
     return render_template('login.html')

@@ -5,10 +5,9 @@ import random
 from flask_login import login_required, current_user
 
 @app.route('/game')
-@login_required
 def game():
-    # login_required will automatically redirect to login if user is not authenticated
-    if not current_user.is_authenticated:
+    # Redirect to login if not authenticated (support both Flask-Login and session)
+    if not (('user' in session) or (hasattr(current_user, 'is_authenticated') and current_user.is_authenticated)):
         return redirect(url_for('login'))
     
     # Hindi characters and their pronunciations
