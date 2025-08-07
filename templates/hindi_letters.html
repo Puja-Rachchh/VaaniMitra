@@ -58,13 +58,19 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hindi Letters (वर्णमाला)</h1>
-        <div class="letters-grid" id="lettersGrid">
-            <!-- Letters will be added dynamically via JavaScript -->
+    <div class="container" style="display: flex;">
+        <div style="flex: 1;">
+            <h1>Hindi Letters (वर्णमाला)</h1>
+            <div class="letters-grid" id="lettersGrid">
+                <!-- Letters will be added dynamically via JavaScript -->
+            </div>
+        </div>
+        <div class="side-panel" id="sidePanel" style="width:180px; height:200px; background:#fff; box-shadow:-2px 0 8px rgba(0,0,0,0.08); padding:18px 10px; display:none; flex-direction:column; align-items:center; justify-content:center; border-radius:10px;">
+            <div class="current-letter" id="currentLetter" style="font-size:2.5rem; margin-bottom:18px;"></div>
+            <div class="current-name" id="currentName" style="font-size: 1.5rem"></div>
+            <button class="next-btn" id="nextBtn" style="padding:7px 18px; font-size:1rem; background:#198754; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px;">Next</button>
         </div>
     </div>
-
     <script>
         const hindiLetters = [
             { letter: 'अ', name: 'a' },
@@ -77,7 +83,7 @@
             { letter: 'ऐ', name: 'ai' },
             { letter: 'ओ', name: 'o' },
             { letter: 'औ', name: 'au' },
-            { letter: 'अं', name: 'an' },
+            { letter: 'अं', name: 'am' },
             { letter: 'अः', name: 'aha' },
             { letter: 'क', name: 'Ka' },
             { letter: 'ख', name: 'Kha' },
@@ -117,24 +123,41 @@
             { letter: 'ज्ञ', name: 'Gya' }
         ];
 
-        function createLetterCards() {
-            const grid = document.getElementById('lettersGrid');
-            
-            hindiLetters.forEach(({ letter, name }) => {
-                const card = document.createElement('div');
-                card.className = 'letter-card';
-                card.innerHTML = `
-                    <div class="letter">${letter}</div>
-                    <div class="letter-name">${name}</div>
-                `;
-                
-                card.addEventListener('click', () => {
-                    playLetterSound(letter);  // Use the Hindi name (e.g., अकार, ककार) for pronunciation
-                });
-                
-                grid.appendChild(card);
+        const lettersGrid = document.getElementById('lettersGrid');
+        const sidePanel = document.getElementById('sidePanel');
+        const currentLetterDiv = document.getElementById('currentLetter');
+        const currentNameDiv = document.getElementById('currentName');
+        const nextBtn = document.getElementById('nextBtn');
+        let currentIndex = null;
+
+        // Render letter cards
+        hindiLetters.forEach(({ letter, name }, idx) => {
+            const card = document.createElement('div');
+            card.className = 'letter-card';
+            card.innerHTML = `
+                <div class="letter">${letter}</div>
+                <div class="letter-name">${name}</div>
+            `;
+            card.addEventListener('click', () => {
+                showSidePanel(idx);
             });
+            lettersGrid.appendChild(card);
+        });
+
+        function showSidePanel(idx) {
+            currentIndex = idx;
+            currentLetterDiv.textContent = hindiLetters[idx].letter;
+            currentNameDiv.textContent = hindiLetters[idx].name;
+            sidePanel.style.display = 'flex';
+            nextBtn.disabled = (idx === hindiLetters.length - 1);
+            playLetterSound(hindiLetters[idx].letter);
         }
+
+        nextBtn.onclick = function() {
+            if (currentIndex !== null && currentIndex < hindiLetters.length - 1) {
+                showSidePanel(currentIndex + 1);
+            }
+        };
 
         async function playLetterSound(letter) {
             try {
@@ -145,18 +168,13 @@
                     },
                     body: JSON.stringify({ letter: letter })
                 });
-                
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-
                 const audioBlob = await response.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const audio = new Audio(audioUrl);
-                
-                await audio.play();
-                
-                // Clean up after playing
+                audio.play();
                 audio.onended = () => {
                     URL.revokeObjectURL(audioUrl);
                 };
@@ -165,9 +183,6 @@
                 alert('Error playing sound');
             }
         }
-
-        // Initialize the grid when the page loads
-        createLetterCards();
     </script>
 </body>
 </html>
