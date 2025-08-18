@@ -109,6 +109,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
+            session['user'] = username  # Also set session for compatibility
             # If user was redirected to login from game route, send them back there
             next_page = request.args.get('next')
             if next_page:
@@ -253,11 +254,7 @@ def update_level_score():
     return jsonify({'success': True, 'nextLevelUnlocked': False})
 
 @app.route('/logout')
-@login_required
 def logout():
     logout_user()
     session.clear()
     return redirect(url_for('index'))
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('login'))
