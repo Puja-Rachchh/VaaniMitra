@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Level 1: Fruits in Hindi - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .fruits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .fruit-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .fruit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .fruit-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .fruit-name {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .fruit-name-english {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .quiz-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Level 1: Learn Fruits in Hindi</h1>
+        
+        <div class="fruits-grid" id="fruitsGrid">
+            <!-- Fruits will be added dynamically via JavaScript -->
+        </div>
+
+        <a href="/intermediate/1/quiz" class="quiz-button">Take Quiz</a>
+
+        <div class="navigation">
+            <a href="/intermediate" class="nav-button">← Back to Levels</a>
+            <a href="#" class="nav-button" style="visibility: hidden;">Next Level →</a>
+        </div>
+    </div>
+
+    <script>
+        const fruits = [
+            { 
+                name: 'सेब',
+                nameEnglish: 'Apple',
+                image: '/static/images/fruits/apple.jpeg'
+            },
+            { 
+                name: 'केला',
+                nameEnglish: 'Banana',
+                image: '/static/images/fruits/banana.jpg'
+            },
+            { 
+                name: 'संतरा',
+                nameEnglish: 'Orange',
+                image: '/static/images/fruits/orange.jpeg'
+            },
+            { 
+                name: 'आम',
+                nameEnglish: 'Mango',
+                image: '/static/images/fruits/mango.jpg'
+            },
+            { 
+                name: 'अंगूर',
+                nameEnglish: 'Grapes',
+                image: '/static/images/fruits/grapes.jpeg'
+            },
+            { 
+                name: 'पपीता',
+                nameEnglish: 'Papaya',
+                image: '/static/images/fruits/papaya.jpeg'
+            },
+            { 
+                name: 'अनार',
+                nameEnglish: 'Pomegranate',
+                image: '/static/images/fruits/pomegranate.jpeg'
+            },
+            { 
+                name: 'नाशपाती',
+                nameEnglish: 'Pear',
+                image: '/static/images/fruits/pear.jpeg'
+            },
+            { 
+                name: 'स्ट्रॉबेरी',
+                nameEnglish: 'Strawberry',
+                image: '/static/images/fruits/strawberry.jpeg'
+            },
+            { 
+                name: 'कीवी',
+                nameEnglish: 'Kiwi',
+                image: '/static/images/fruits/kiwi.jpeg'
+            },
+            { 
+                name: 'अनन्नास',
+                nameEnglish: 'Pineapple',
+                image: '/static/images/fruits/pineapple.jpeg'
+            },
+            { 
+                name: 'चेरी',
+                nameEnglish: 'Cherry',
+                image: '/static/images/fruits/cherry.jpeg'
+            },
+            { 
+                name: 'तरबूज',
+                nameEnglish: 'Watermelon',
+                image: '/static/images/fruits/watermelon.jpeg'
+            },
+            {
+                name: 'गन्ना',
+                nameEnglish: 'Sugarcane',
+                image: '/static/images/fruits/sugarcane.jpeg'
+            },
+            {
+                name: 'लीची',
+                nameEnglish: 'Lychee',
+                image: '/static/images/fruits/lichi.jpeg'
+            }
+        ];
+
+        function createFruitCards() {
+            const grid = document.getElementById('fruitsGrid');
+            
+            fruits.forEach(fruit => {
+                const card = document.createElement('div');
+                card.className = 'fruit-card';
+                card.innerHTML = `
+                    <img src="${fruit.image}" alt="${fruit.nameEnglish}" class="fruit-image">
+                    <div class="fruit-name">${fruit.name}</div>
+                    <div class="fruit-name-english">${fruit.nameEnglish}</div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    playFruitSound(fruit.name);
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+
+        async function playFruitSound(fruitName) {
+            try {
+                const response = await fetch(`/generate-audio?text=${encodeURIComponent(fruitName)}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const blob = await response.blob();
+                const audio = new Audio(URL.createObjectURL(blob));
+                await audio.play();
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                alert('Error playing sound');
+            }
+        }
+
+        // Initialize the grid when the page loads
+        createFruitCards();
+    </script>
+</body>
+</html>

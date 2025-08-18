@@ -133,8 +133,11 @@ def language_selection():
         user.level = level
         db.session.commit()
 
-        if target == 'Hindi' and level == 'Beginner':
-            return redirect(url_for('beginner_choice'))
+        if target == 'Hindi':
+            if level == 'Beginner':
+                return redirect(url_for('beginner_choice'))
+            elif level == 'Intermediate':
+                return redirect(url_for('intermediate_levels'))
         return redirect(url_for('home'))
 
     return render_template('language_selection.html')
@@ -179,6 +182,75 @@ def generate_audio():
         return send_file(temp_file, mimetype="audio/mpeg")
     except Exception as e:
         return str(e), 500
+
+@app.route('/intermediate')
+def intermediate_levels():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user is None:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    if user.target_language != 'Hindi' or user.level != 'Intermediate':
+        return redirect(url_for('home'))
+    return render_template('intermediate_levels.html')
+
+@app.route('/intermediate/<int:level>')
+def intermediate_level(level):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user is None:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    if user.target_language != 'Hindi' or user.level != 'Intermediate':
+        return redirect(url_for('home'))
+    
+    # Check if previous level is completed for levels > 1
+    if level > 1:
+        prev_level_completed = getattr(user, f'intermediate_level_{level-1}_completed', False)
+        if not prev_level_completed:
+            return redirect(url_for('intermediate_levels'))
+    
+    return render_template(f'intermediate_level{level}.html')
+
+@app.route('/intermediate/<int:level>/quiz')
+def intermediate_level_quiz(level):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    if user is None:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    if user.target_language != 'Hindi' or user.level != 'Intermediate':
+        return redirect(url_for('home'))
+    return render_template(f'intermediate_level{level}_quiz.html')
+
+@app.route('/update-level-score', methods=['POST'])
+def update_level_score():
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    level = data.get('level')
+    score = data.get('score')
+    
+    if not level or score is None:
+        return jsonify({'error': 'Missing level or score'}), 400
+    
+    user = User.query.filter_by(username=session['user']).first()
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Update user's progress in the database
+    setattr(user, f'intermediate_level_{level}_score', score)
+    if score >= 80:  # Pass mark is 80%
+        setattr(user, f'intermediate_level_{level}_completed', True)
+        db.session.commit()
+        return jsonify({'success': True, 'nextLevelUnlocked': True})
+    
+    db.session.commit()
+    return jsonify({'success': True, 'nextLevelUnlocked': False})
 
 @app.route('/logout')
 @login_required
