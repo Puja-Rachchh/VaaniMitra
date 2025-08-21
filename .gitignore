@@ -1,6 +1,6 @@
-temp_audio.mp3
+*.mp3
 __pycache__/
 *.pyc
 
 # Databases
-*.db
+#*.db
