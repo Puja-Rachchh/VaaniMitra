@@ -24,6 +24,19 @@ def home():
         return render_template('index.html', username=user.username, known=user.known_language, target=user.target_language, level=user.level)
     return redirect(url_for('login'))
 
+    if 'user' not in session:
+        print('Not logged in')
+        return redirect(url_for('login'))
+    user = User.query.filter_by(username=session['user']).first()
+    print('User:', user)
+    if user is None:
+        print('User not found in DB')
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    print('Target language:', user.target_language, 'Level:', user.level)
+    if user.target_language != 'Hindi' or user.level != 'Intermediate':
+        print('User does not meet Hindi/Intermediate requirement')
+        return render_template('intermediate_levels.html', error='You must select Hindi and Intermediate level to access this content.')
 @app.route('/hindi_letters')
 def hindi_letters():
     if 'user' not in session:
@@ -200,21 +213,26 @@ def intermediate_levels():
 
 @app.route('/intermediate/<int:level>')
 def intermediate_level(level):
+    print('Session user:', session.get('user'))
     if 'user' not in session:
+        print('Not logged in')
         return redirect(url_for('login'))
     user = User.query.filter_by(username=session['user']).first()
+    print('User:', user)
     if user is None:
+        print('User not found in DB')
         session.pop('user', None)
         return redirect(url_for('login'))
+    print('Target language:', user.target_language, 'Level:', user.level)
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
-        return redirect(url_for('home'))
-    
-    # Check if previous level is completed for levels > 1
-    if level > 1:
-        prev_level_completed = getattr(user, f'intermediate_level_{level-1}_completed', False)
-        if not prev_level_completed:
-            return redirect(url_for('intermediate_levels'))
-    
+        print('User does not meet Hindi/Intermediate requirement')
+        return render_template('intermediate_levels.html', error='You must select Hindi and Intermediate level to access this content.')
+    # Level access is now open for all intermediate levels
+    # Route Level 2 to animals page
+    if level == 2:
+        print('Rendering intermediate_level2.html')
+        return render_template('intermediate_level2.html')
+    print(f'Rendering intermediate_level{level}.html')
     return render_template(f'intermediate_level{level}.html')
 
 @app.route('/intermediate/<int:level>/quiz')

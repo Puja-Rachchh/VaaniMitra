@@ -1,0 +1,189 @@
+<script>
+function playPronunciation(word) {
+    fetch('/play_hindi_letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ letter: word })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Audio fetch failed');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+        audio.onended = () => URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        alert('Could not play sound: ' + err.message);
+    });
+}
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Intermediate Level 2 - Animals</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            padding: 40px 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .animal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+        }
+        /* .animal-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        } */
+        .animal-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+        .animal-card:hover {
+            box-shadow: 0 6px 18px rgba(44,62,80,0.12);
+            background: #e0f7fa;
+        }
+        .animal-hindi {
+            font-size: 2.2rem;
+            color: #0077b6;
+            margin-bottom: 10px;
+        }
+        .animal-english {
+            font-size: 1.2rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Level 2 - Learn all Animals and Birds in Hindi.</h1>
+        <div class="animal-grid" id="animalGrid">
+            <div class="animal-card">
+                <img src="/static/images/animals/dog.jpg" alt="Dog" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कुत्ता')">
+                <div class="animal-hindi">कुत्ता</div>
+                <div class="animal-english">Dog</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/cat.jpg" alt="Cat" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बिल्ली')">
+                <div class="animal-hindi">बिल्ली</div>
+                <div class="animal-english">Cat</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/cow.jpg" alt="Cow" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गाय')">
+                <div class="animal-hindi">गाय</div>
+                <div class="animal-english">Cow</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/horse.jpg" alt="Horse" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('घोड़ा')">
+                <div class="animal-hindi">घोड़ा</div>
+                <div class="animal-english">Horse</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/goat.jpeg" alt="Goat" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बकरी')">
+                <div class="animal-hindi">बकरी</div>
+                <div class="animal-english">Goat</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/lion.jpg" alt="Lion" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('शेर')">
+                <div class="animal-hindi">शेर</div>
+                <div class="animal-english">Lion</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/elephant.jpg" alt="Elephant" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('हाथी')">
+                <div class="animal-hindi">हाथी</div>
+                <div class="animal-english">Elephant</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/bear.jpg" alt="Bear" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('भालू')">
+                <div class="animal-hindi">भालू</div>
+                <div class="animal-english">Bear</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/monkey.jpg" alt="Monkey" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बंदर')">
+                <div class="animal-hindi">बंदर</div>
+                <div class="animal-english">Monkey</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/fox.jpg" alt="Fox" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('लोमड़ी')">
+                <div class="animal-hindi">लोमड़ी</div>
+                <div class="animal-english">Fox</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/sheep.jpg" alt="Sheep" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('भेड़')">
+                <div class="animal-hindi">भेड़</div>
+                <div class="animal-english">Sheep</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/camel.jpeg" alt="Camel" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('ऊंट')">
+                <div class="animal-hindi">ऊंट</div>
+                <div class="animal-english">Camel</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/mouse.jpg" alt="Mouse" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('चूहा')">
+                <div class="animal-hindi">चूहा</div>
+                <div class="animal-english">Mouse</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/snake.jpg" alt="Snake" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('साँप')">
+                <div class="animal-hindi">साँप</div>
+                <div class="animal-english">Snake</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/fish.jpeg" alt="Fish" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('मछली')">
+                <div class="animal-hindi">मछली</div>
+                <div class="animal-english">Fish</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/turtle.jpg" alt="Turtle" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कछुआ')">
+                <div class="animal-hindi">कछुआ</div>
+                <div class="animal-english">Turtle</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/donkey.jpg" alt="Donkey" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गधा')">
+                <div class="animal-hindi">गधा</div>
+                <div class="animal-english">Donkey</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/rabbit.jpg" alt="Rabbit" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('खरगोश')">
+                <div class="animal-hindi">खरगोश</div>
+                <div class="animal-english">Rabbit</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/tiger.jpg" alt="Tiger" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बाघ')">
+                <div class="animal-hindi">बाघ</div>
+                <div class="animal-english">Tiger</div>
+            </div>
+            <div class="animal-card">
+                <img src="/static/images/animals/rhino.jpeg" alt="Rhinoceros" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गैंडा')">
+                <div class="animal-hindi">गैंडा</div>
+                <div class="animal-english">Rhinoceros</div>
+            </div>
+        </div>
+    </div>
+    
