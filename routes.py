@@ -211,7 +211,15 @@ def intermediate_levels():
         return redirect(url_for('login'))
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
-    return render_template('intermediate_levels.html')
+
+    # Get progress for Level 1 and Level 2
+    progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
+    progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
+    score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
+    score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
+    passed_level1 = score1 >= 60
+
+    return render_template('intermediate_levels.html', score1=score1, score2=score2, passed_level1=passed_level1)
 
 @app.route('/intermediate/<int:level>')
 def intermediate_level(level):
@@ -229,7 +237,13 @@ def intermediate_level(level):
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         print('User does not meet Hindi/Intermediate requirement')
         return render_template('intermediate_levels.html', error='You must select Hindi and Intermediate level to access this content.')
-    # Level access is now open for all intermediate levels
+
+    # Check if user passed Level 1 before allowing Level 2 access
+    progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
+    score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
+    if level == 2 and score1 < 60:
+        return redirect(url_for('intermediate_levels'))
+
     # Route Level 2 to animals page
     if level == 2:
         print('Rendering intermediate_level2.html')
@@ -247,6 +261,8 @@ def intermediate_level_quiz(level):
         return redirect(url_for('login'))
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
+    if level == 2:
+        return render_template('intermediate_level2_quiz.html')
     return render_template(f'intermediate_level{level}_quiz.html')
 
 @app.route('/update-level-score', methods=['POST'])
