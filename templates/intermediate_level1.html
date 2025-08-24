@@ -24,6 +24,13 @@
             font-size: 2.2em;
         }
 
+        h2 {
+            margin-top: 40px;
+            color: #27ae60;
+            text-align: left;
+            font-size: 1.8em;
+        }
+
         .fruits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -111,14 +118,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Level 1: Learn Fruits in Hindi</h1>
-        
+        <h1>Level 1: Learn Fruits and Vegetables in Hindi</h1>
+        <h2 style="margin-top:40px;color:#27ae60;text-align:left;">Vegetables</h2>
+        <div class="fruits-grid" id="vegetablesGrid">
+            <!-- Vegetables will be added dynamically via JavaScript -->
+        </div>
+        <h2 style="margin-top:40px;color:#6c5ce7;text-align:left;">Fruits</h2>
         <div class="fruits-grid" id="fruitsGrid">
             <!-- Fruits will be added dynamically via JavaScript -->
         </div>
-
         <a href="/intermediate/1/quiz" class="quiz-button">Take Quiz</a>
-
         <div class="navigation">
             <a href="/intermediate" class="nav-button">← Back to Levels</a>
             <a href="/intermediate/2" class="nav-button">Next Level →</a>
@@ -201,8 +210,86 @@
                 name: 'लीची',
                 nameEnglish: 'Lychee',
                 image: '/static/images/fruits/lichi.jpeg'
-            }
+            },
         ];
+
+        const vegetables = [
+            {
+                name: 'आलू',
+                nameEnglish: 'Potato',
+                image: '/static/images/fruits/potato.jpg'
+            },
+            { 
+                name: 'करेला',
+                nameEnglish: 'Bitter Gourd',
+                image: '/static/images/fruits/bitter_gourd.jpg'
+            },
+            {
+                name: 'टमाटर',
+                nameEnglish: 'Tomato',
+                image: '/static/images/fruits/tomato.jpeg'
+            },
+            {
+                name: 'लौकी',
+                nameEnglish: 'Bottle Gourd',
+                image: '/static/images/fruits/bottle_gourd.jpeg'
+            },
+            {
+                name: 'बैंगन',
+                nameEnglish: 'Brinjal',
+                image: '/static/images/fruits/brinjal.jpg'
+            },
+            {
+                name: 'पत्ता गोभी',
+                nameEnglish: 'Cabbage',
+                image: '/static/images/fruits/cabbage.jpg'
+            },
+            {
+                name: 'शिमला मिर्च',
+                nameEnglish: 'Capcicum',
+                image: '/static/images/fruits/capcicum.jpeg'
+            },
+            {
+                name: 'फूलगोभी',
+                nameEnglish: 'Cauliflower',
+                image: '/static/images/fruits/cauliflower.jpeg'
+            },
+            {
+                name: 'भिंडी',
+                nameEnglish: 'Lady Finger',
+                image: '/static/images/fruits/lady_finger.jpg'
+            },
+            {
+                name: 'मशरूम',
+                nameEnglish: 'Mushroom',
+                image: '/static/images/fruits/mushroom.jpeg'
+            },
+            {
+                name: 'प्याज',
+                nameEnglish: 'Onion',
+                image: '/static/images/fruits/onion.jpeg'
+            },
+            {
+                name: 'मटर',
+                nameEnglish: 'Peas',
+                image: '/static/images/fruits/peas.jpeg'
+            },
+            {
+                name: 'गाजर',
+                nameEnglish: 'Chilli',
+                image: '/static/images/fruits/chilli.jpg'
+            },
+            {
+                name: 'कद्दू',
+                nameEnglish: 'Pumpkin',
+                image: '/static/images/fruits/pumpkin.jpeg'
+            },
+            {
+                name: 'पालक',
+                nameEnglish: 'Spinach',
+                image: '/static/images/fruits/spinach.jpg'
+            }
+        ];  
 
         function createFruitCards() {
             const grid = document.getElementById('fruitsGrid');
@@ -224,6 +311,23 @@
             });
         }
 
+        function createVegetableCards() {
+            const grid = document.getElementById('vegetablesGrid');
+            vegetables.forEach(veg => {
+                const card = document.createElement('div');
+                card.className = 'fruit-card';
+                card.innerHTML = `
+                    <img src="${veg.image}" alt="${veg.nameEnglish}" class="fruit-image">
+                    <div class="fruit-name">${veg.name}</div>
+                    <div class="fruit-name-english">${veg.nameEnglish}</div>
+                `;
+                card.addEventListener('click', () => {
+                    playFruitSound(veg.name);
+                });
+                grid.appendChild(card);
+            });
+        }
+
         async function playFruitSound(fruitName) {
             try {
                 const response = await fetch(`/generate-audio?text=${encodeURIComponent(fruitName)}`);
@@ -239,6 +343,7 @@
         }
 
         // Initialize the grid when the page loads
+        createVegetableCards();
         createFruitCards();
     </script>
 </body>
