@@ -1,27 +1,30 @@
 from flask import render_template, request, redirect, url_for, session, jsonify, send_file, after_this_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from models import User
-from app import app, db, login_manager
+from mongodb_models import User, UserProgress, mongo
+from app import app, login_manager
 import os
 import random
 from gtts import gTTS
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
 @app.route('/')
 def index():
+    # Clear any invalid session data
     if 'user' in session:
-        return redirect(url_for('home'))
+        user = User.find_by_username(session['user'])
+        if user:
+            return redirect(url_for('home'))
+        else:
+            # Clear invalid session
+            session.clear()
     return render_template('index.html')
 
 @app.route('/home')
 def home():
     if 'user' in session:
-        user = User.query.filter_by(username=session['user']).first()
-        return render_template('index.html', username=user.username, known=user.known_language, target=user.target_language, level=user.level)
+        user = User.find_by_username(session['user'])
+        if user:
+            return render_template('index.html', username=user.username, known=user.known_language, target=user.target_language, level=user.level)
     return redirect(url_for('login'))
 
     if 'user' not in session:
@@ -41,8 +44,8 @@ def home():
 def hindi_letters():
     if 'user' not in session:
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
-    if user.target_language != 'Hindi' or user.level != 'Beginner':
+    user = User.find_by_username(session['user'])
+    if not user or user.target_language != 'Hindi' or user.level != 'Beginner':
         return redirect(url_for('home'))
     return render_template('hindi_letters.html')
 
@@ -95,20 +98,18 @@ def signup():
         username = request.form['username']
         password = request.form['password']
 
-        existing_user = User.query.filter_by(username=username).first()
+        existing_user = User.find_by_username(username)
         if existing_user:
             return "Username already exists."
 
-        hashed_password = generate_password_hash(password)
         new_user = User(
             username=username,
-            password=hashed_password,
             known_language=None,
             target_language=None,
             level=None
         )
-        db.session.add(new_user)
-        db.session.commit()
+        new_user.set_password(password)
+        new_user.save()
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -118,9 +119,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        user = User.query.filter_by(username=username).first()
+        user = User.find_by_username(username)
 
-        if user and check_password_hash(user.password, password):
+        if user and user.check_password(password):
             login_user(user)
 
             session['user'] = username  # Also set session for compatibility
@@ -143,18 +144,19 @@ def language_selection():
         target = request.form['target_language']
         level = request.form['level']
 
-        user = User.query.filter_by(username=session['user']).first()
-        user.known_language = known
-        user.target_language = target
-        user.level = level
-        db.session.commit()
+        user = User.find_by_username(session['user'])
+        if user:
+            user.known_language = known
+            user.target_language = target
+            user.level = level
+            user.save()
 
-        if target == 'Hindi':
-            if level == 'Beginner':
-                return redirect(url_for('beginner_choice'))
-            elif level == 'Intermediate':
-                return redirect(url_for('intermediate_levels'))
-        return redirect(url_for('home'))
+            if target == 'Hindi':
+                if level == 'Beginner':
+                    return redirect(url_for('beginner_choice'))
+                elif level == 'Intermediate':
+                    return redirect(url_for('intermediate_levels'))
+            return redirect(url_for('home'))
 
     return render_template('language_selection.html')
 
@@ -162,8 +164,8 @@ def language_selection():
 def beginner_choice():
     if 'user' not in session:
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
-    if user.target_language != 'Hindi' or user.level != 'Beginner':
+    user = User.find_by_username(session['user'])
+    if not user or user.target_language != 'Hindi' or user.level != 'Beginner':
         return redirect(url_for('home'))
     return render_template('beginner_choice.html')
 
@@ -171,8 +173,8 @@ def beginner_choice():
 def beginner_quiz():
     if 'user' not in session:
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
-    if user.target_language != 'Hindi' or user.level != 'Beginner':
+    user = User.find_by_username(session['user'])
+    if not user or user.target_language != 'Hindi' or user.level != 'Beginner':
         return redirect(url_for('home'))
     return redirect(url_for('game'))
 
@@ -203,13 +205,21 @@ def generate_audio():
 def intermediate_levels():
     if 'user' not in session:
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
+    user = User.find_by_username(session['user'])
     if user is None:
         session.pop('user', None)
         return redirect(url_for('login'))
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
-    return render_template('intermediate_levels.html')
+
+    # Get progress for Level 1 and Level 2
+    progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
+    progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
+    score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
+    score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
+    passed_level1 = score1 >= 60
+
+    return render_template('intermediate_levels.html', score1=score1, score2=score2, passed_level1=passed_level1)
 
 @app.route('/intermediate/<int:level>')
 def intermediate_level(level):
@@ -217,7 +227,7 @@ def intermediate_level(level):
     if 'user' not in session:
         print('Not logged in')
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
+    user = User.find_by_username(session['user'])
     print('User:', user)
     if user is None:
         print('User not found in DB')
@@ -227,7 +237,13 @@ def intermediate_level(level):
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         print('User does not meet Hindi/Intermediate requirement')
         return render_template('intermediate_levels.html', error='You must select Hindi and Intermediate level to access this content.')
-    # Level access is now open for all intermediate levels
+
+    # Check if user passed Level 1 before allowing Level 2 access
+    progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
+    score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
+    if level == 2 and score1 < 60:
+        return redirect(url_for('intermediate_levels'))
+
     # Route Level 2 to animals page
     if level == 2:
         print('Rendering intermediate_level2.html')
@@ -239,7 +255,7 @@ def intermediate_level(level):
 def intermediate_level_quiz(level):
     if 'user' not in session:
         return redirect(url_for('login'))
-    user = User.query.filter_by(username=session['user']).first()
+    user = User.find_by_username(session['user'])
     if user is None:
         session.pop('user', None)
         return redirect(url_for('login'))
@@ -261,18 +277,22 @@ def update_level_score():
     if not level or score is None:
         return jsonify({'error': 'Missing level or score'}), 400
     
-    user = User.query.filter_by(username=session['user']).first()
+    user = User.find_by_username(session['user'])
     if user is None:
         return jsonify({'error': 'User not found'}), 404
     
-    # Update user's progress in the database
-    setattr(user, f'intermediate_level_{level}_score', score)
-    if score >= 80:  # Pass mark is 80%
-        setattr(user, f'intermediate_level_{level}_completed', True)
-        db.session.commit()
+    # Save user progress to MongoDB
+    progress = UserProgress(
+        user_id=str(user._id),
+        level=f'intermediate_level_{level}',
+        score=score,
+        completed=(score >= 80)  # Pass mark is 80%
+    )
+    progress.save()
+    
+    if score >= 80:
         return jsonify({'success': True, 'nextLevelUnlocked': True})
     
-    db.session.commit()
     return jsonify({'success': True, 'nextLevelUnlocked': False})
 
 @app.route('/logout')

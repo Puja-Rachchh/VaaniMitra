@@ -1,30 +1,41 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_pymongo import PyMongo
+from mongodb_models import mongo, User
 import os
-import secrets
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-#secret_key = secrets.token_hex(16) # Generates a 32-character hexadecimal string
-app.secret_key = 'fkeifhei46ngjrn'
+
+# Configuration
+app.secret_key = os.getenv('SECRET_KEY', 'fkeifhei46ngjrn')
+
+# Configure MongoDB
+app.config['MONGO_URI'] = os.getenv('MONGODB_URI') + os.getenv('DATABASE_NAME', 'vaanimitra_db')
+
+# Initialize MongoDB
+mongo.init_app(app)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # Specify the login route name
 
-# Configure SQLite database
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'users.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        return User.find_by_id(user_id)
+    except Exception as e:
+        # If user_id is invalid (e.g., from old SQLite system), return None
+        print(f"Error loading user {user_id}: {e}")
+        return None
 
-db = SQLAlchemy(app)
-
-# Import routes after creating app and db to avoid circular imports
+# Import routes after creating app and mongo to avoid circular imports
 from routes import *
 from game_routes import *
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
