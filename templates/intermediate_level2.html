@@ -27,56 +27,97 @@ function playPronunciation(word) {
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
         }
         .container {
-            max-width: 900px;
-            margin: 40px auto;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
             background: #fff;
             border-radius: 18px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-            padding: 40px 30px;
         }
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 30px;
+            font-size: 2.2em;
         }
         .animal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px;
         }
-        /* .animal-image {
+        .animal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .animal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .animal-card img {
             width: 150px;
             height: 150px;
             object-fit: cover;
             border-radius: 10px;
             margin-bottom: 15px;
-        } */
-        .animal-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 24px 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: box-shadow 0.2s;
-        }
-        .animal-card:hover {
-            box-shadow: 0 6px 18px rgba(44,62,80,0.12);
-            background: #e0f7fa;
         }
         .animal-hindi {
-            font-size: 2.2rem;
-            color: #0077b6;
-            margin-bottom: 10px;
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 5px;
         }
         .animal-english {
-            font-size: 1.2rem;
-            color: #333;
+            color: #666;
+            font-size: 1em;
+        }
+        .quiz-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            background: #e9ecef;
         }
     </style>
 </head>
@@ -185,5 +226,12 @@ function playPronunciation(word) {
                 <div class="animal-english">Rhinoceros</div>
             </div>
         </div>
+            <div style="text-align:center; margin-top:40px;">
+        <a href="/intermediate/2/quiz" class="quiz-button">Take Quiz</a>
+        <div class="navigation">
+            <a href="/intermediate" class="nav-button">← Back to Levels</a>
+            <a href="/intermediate/3" class="nav-button">Next Level →</a>
+        </div>
+            </div>
     </div>
     
