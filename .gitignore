@@ -1,6 +1,7 @@
 *.mp3
 __pycache__/
 *.pyc
-
+.env
+*.venv/
 # Databases
 #*.db

@@ -239,6 +239,23 @@
         { hindi: 'बाघ', english: 'Tiger', image: '/static/images/animals/tiger.jpg' },
         { hindi: 'गैंडा', english: 'Rhinoceros', image: '/static/images/animals/rhino.jpeg' }
     ];
+    const birds = [
+        { hindi: 'कौआ', english: 'Crow', image: '/static/images/animals/crow.jpeg' },
+        { hindi: 'तोता', english: 'Parrot', image: '/static/images/animals/parrot.jpg' },
+        { hindi: 'गौरैया', english: 'Sparrow', image: '/static/images/animals/sparrow.jpeg' },
+        { hindi: 'मोर', english: 'Peacock', image: '/static/images/animals/peacock.jpg' },
+        { hindi: 'कबूतर', english: 'Pigeon', image: '/static/images/animals/pigeon.jpg' },
+        { hindi: 'हंस', english: 'Swan', image: '/static/images/animals/swan.JPG' },
+        { hindi: 'बत्तख', english: 'Duck', image: '/static/images/animals/duck.jpg' },
+        { hindi: 'चील', english: 'Eagle', image: '/static/images/animals/eagle.jpeg' },
+        { hindi: 'उल्लू', english: 'Owl', image: '/static/images/animals/owl.jpg' },
+        { hindi: 'तितली', english: 'Butterfly', image: '/static/images/animals/butterfly.jpg' },
+        { hindi: 'सारस', english: 'Crane', image: '/static/images/animals/crane.jpg' },
+        { hindi: 'फ्लेमिंगो', english: 'Flamingo', image: '/static/images/animals/flamingo.jpg' },
+        { hindi: 'मुर्गी', english: 'Hen', image: '/static/images/animals/hen.jpg' },
+        { hindi: 'किंगफिशर', english: 'Kingfisher', image: '/static/images/animals/kingfisher.jpg' },
+        { hindi: 'कठफोड़वा', english: 'Woodpecker', image: '/static/images/animals/woodpecker.jpeg' }
+    ];
     let score = 0;
     let current = 0;
     let quizOrder = [];
@@ -250,29 +267,31 @@
         }
     }
     function startQuiz() {
-        score = 0;
-        current = 0;
-        quizOrder = [...animals];
-        shuffle(quizOrder);
-        quizOrder = quizOrder.slice(0, 5); // Only 5 random questions
-        showQuestion();
+    score = 0;
+    current = 0;
+    // Mix animals and birds
+    let allItems = [...animals, ...birds];
+    shuffle(allItems);
+    quizOrder = allItems.slice(0, 5); // Only 5 random questions
+    showQuestion();
     }
     function showQuestion() {
         if (current >= quizOrder.length) {
             showReport();
             return;
         }
-        const animal = quizOrder[current];
-        // Pick 3 random wrong options
-        let options = [animal];
-        let wrongs = animals.filter(a => a !== animal);
+        const item = quizOrder[current];
+        // Pick 3 random wrong options from both animals and birds
+        let options = [item];
+        let allItems = [...animals, ...birds];
+        let wrongs = allItems.filter(a => a !== item);
         shuffle(wrongs);
         options = options.concat(wrongs.slice(0, 3));
         shuffle(options);
-        let html = `<img class='quiz-image' src='${animal.image}' alt='${animal.english}'>`;
+        let html = `<img class='quiz-image' src='${item.image}' alt='${item.english}'>`;
         html += `<div class='options'>`;
         options.forEach(opt => {
-            html += `<div class='option' onclick='chooseOption(this, "${opt.hindi}", "${animal.hindi}")'>${opt.hindi}</div>`;
+            html += `<div class='option' onclick='chooseOption(this, "${opt.hindi}", "${item.hindi}")'>${opt.hindi}</div>`;
         });
         html += `</div>`;
         document.getElementById('quizArea').innerHTML = html;
@@ -300,9 +319,10 @@
     function showReport() {
         let accuracy = Math.round((score / quizOrder.length) * 100);
         let mistakes = '';
-        quizOrder.forEach((animal, idx) => {
-            if (userAnswers[idx] && userAnswers[idx] !== animal.hindi) {
-                mistakes += `<div class='mistake-card'><b>Animal:</b> ${animal.english}<br><b>Your Answer:</b> ${userAnswers[idx]}<br><b>Correct Answer:</b> ${animal.hindi}<br><span class='practice-tip'>Practice Tip: Try saying "${animal.hindi}" for "${animal.english}" slowly and listen to the pronunciation multiple times.</span></div>`;
+        quizOrder.forEach((item, idx) => {
+            // Only show if user's answer exists AND is not correct AND is not empty
+            if (userAnswers[idx] && userAnswers[idx] !== item.hindi && userAnswers[idx].trim() !== item.hindi.trim()) {
+                mistakes += `<div class='mistake-card'><b>${item.image.includes('/animals/') ? 'Animal' : 'Bird'}:</b> ${item.english}<br><b>Your Answer:</b> ${userAnswers[idx]}<br><b>Correct Answer:</b> ${item.hindi}<br><span class='practice-tip'>Practice Tip: Try saying "${item.hindi}" for "${item.english}" slowly and listen to the pronunciation multiple times.</span></div>`;
             }
         });
         let reportHtml = `
@@ -339,130 +359,23 @@
                 <a href='/intermediate' class='button' style='text-decoration:none;'>Back to Home 🏠</a>
             </div>
         </div>
-        <style>
-            .report-container {
-                background: linear-gradient(135deg, #f7faff 0%, #e3f6fc 100%);
-                border-radius: 24px;
-                box-shadow: 0 8px 32px rgba(44,62,80,0.08);
-                padding: 40px 30px;
-                max-width: 600px;
-                margin: 30px auto;
-                animation: fadeIn 0.7s;
-            }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .report-title {
-                font-size: 2.2em;
-                color: #2c3e50;
-                margin-bottom: 18px;
-            }
-            .emoji { font-size: 1.1em; }
-            .score-circle {
-                width: 120px;
-                height: 120px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 2.5em;
-                color: #2c3e50;
-                margin: 0 auto 18px auto;
-                box-shadow: 0 4px 16px #a1c4fd44;
-            }
-            .accuracy {
-                font-size: 1.2em;
-                margin-bottom: 18px;
-                color: #34495e;
-            }
-            .accuracy span {
-                color: #27ae60;
-                font-weight: bold;
-            }
-            .report-cards {
-                display: flex;
-                justify-content: center;
-                gap: 18px;
-                margin-bottom: 18px;
-            }
-            .report-card {
-                background: #fff;
-                padding: 16px 22px;
-                border-radius: 14px;
-                box-shadow: 0 2px 8px #eee;
-                min-width: 180px;
-            }
-            .performance-text {
-                color: #6c5ce7;
-                font-weight: 500;
-            }
-            .mistakes-section {
-                margin-bottom: 18px;
-                text-align: left;
-            }
-            .mistake-card {
-                background: #ffeaea;
-                border-left: 5px solid #e74c3c;
-                border-radius: 10px;
-                padding: 12px 18px;
-                margin: 10px 0;
-                box-shadow: 0 2px 8px #f7cac9;
-            }
-            .practice-tip {
-                display: block;
-                background: #e3f6fc;
-                padding: 4px 8px;
-                border-radius: 6px;
-                margin-top: 6px;
-                color: #2c3e50;
-                font-size: 0.98em;
-            }
-            .no-mistakes {
-                color: #27ae60;
-                font-weight: bold;
-            }
-            .suggestions-section {
-                margin-bottom: 18px;
-                text-align: left;
-            }
-            .suggestions-section ul {
-                padding-left: 18px;
-            }
-            .suggestions-section li {
-                margin-bottom: 6px;
-                color: #34495e;
-            }
-            .report-actions {
-                display: flex;
-                justify-content: center;
-                gap: 18px;
-                margin-top: 18px;
-            }
-            .button {
-                background: linear-gradient(to right, #6c5ce7, #a1c4fd);
-                color: white;
-                border: none;
-                padding: 15px 40px;
-                border-radius: 25px;
-                font-size: 1.1em;
-                cursor: pointer;
-                transition: transform 0.3s ease, box-shadow 0.3s;
-                margin-top: 0;
-                width: auto;
-                box-shadow: 0 2px 8px #a1c4fd44;
-            }
-            .button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 16px #6c5ce744;
-            }
-        </style>
         `;
         document.getElementById('quizArea').innerHTML = reportHtml;
+        // Send score to server (MongoDB)
+        fetch('/update-level-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                level: 2,
+                score: accuracy
+            })
+        });
     }
     // Start quiz on page load
     startQuiz();
     </script>
 </body>
+
 </html>

@@ -263,6 +263,21 @@
             { english: 'Cherry', hindi: 'चेरी', image: '/static/images/fruits/cherry.jpeg' }
         ];
 
+        const allVegetables = [
+            { english: 'Potato', hindi: 'आलू', image: '/static/images/fruits/potato.jpg' },
+            { english: 'Bitter Gourd', hindi: 'करेला', image: '/static/images/fruits/bitter_gourd.jpg' },
+            { english: 'Tomato', hindi: 'टमाटर', image: '/static/images/fruits/tomato.jpeg' },
+            { english: 'Bottle Gourd', hindi: 'लौकी', image: '/static/images/fruits/bottle_gourd.jpeg' },
+            { english: 'Brinjal', hindi: 'बैंगन', image: '/static/images/fruits/brinjal.jpg' },
+            { english: 'Cabbage', hindi: 'पत्ता गोभी', image: '/static/images/fruits/cabbage.jpg' },
+            { english: 'Capcicum', hindi: 'शिमला मिर्च', image: '/static/images/fruits/capcicum.jpeg' },
+            { english: 'Cauliflower', hindi: 'फूलगोभी', image: '/static/images/fruits/cauliflower.jpeg' },
+            { english: 'Lady Finger', hindi: 'भिंडी', image: '/static/images/fruits/lady_finger.jpg' },
+            { english: 'Mushroom', hindi: 'मशरूम', image: '/static/images/fruits/mushroom.jpeg' },
+            { english: 'Onion', hindi: 'प्याज', image: '/static/images/fruits/onion.jpeg' },
+            { english: 'Peas', hindi: 'मटर', image: '/static/images/fruits/peas.jpeg' }
+        ];
+
         // Shuffle array function
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -273,33 +288,33 @@
         }
 
         // Generate random options for a question
-        function generateOptions(correctFruit) {
-            let options = [correctFruit.hindi];
-            let otherFruits = allFruits.filter(f => f.hindi !== correctFruit.hindi);
-            shuffleArray(otherFruits);
+        function generateOptions(correctItem, allItems) {
+            let options = [correctItem.hindi];
+            let otherItems = allItems.filter(f => f.hindi !== correctItem.hindi);
+            shuffleArray(otherItems);
             
             // Add 3 random wrong options
-            options = options.concat(otherFruits.slice(0, 3).map(f => f.hindi));
+            options = options.concat(otherItems.slice(0, 3).map(f => f.hindi));
             
             // Shuffle the options
             shuffleArray(options);
             
             return {
                 options,
-                correct: options.indexOf(correctFruit.hindi)
+                correct: options.indexOf(correctItem.hindi)
             };
         }
 
-        // Generate quiz questions
+        // Generate quiz questions (mix fruits and vegetables)
         function generateQuiz() {
-            // Shuffle and take 5 random fruits
-            const selectedFruits = shuffleArray([...allFruits]).slice(0, 5);
+            const allItems = [...allFruits, ...allVegetables];
+            const selectedItems = shuffleArray([...allItems]).slice(0, 5);
             
-            return selectedFruits.map(fruit => {
-                const { options, correct } = generateOptions(fruit);
+            return selectedItems.map(item => {
+                const { options, correct } = generateOptions(item, allItems);
                 return {
-                    image: fruit.image,
-                    question: `What is '${fruit.english}' called in Hindi?`,
+                    image: item.image,
+                    question: `What is '${item.english}' called in Hindi?`,
                     options: options,
                     correct: correct
                 };
@@ -374,7 +389,8 @@
 
             let mistakes = '';
             quizData.forEach((q, idx) => {
-                if (userAnswers[idx] && userAnswers[idx] !== q.options[q.correct]) {
+                // Only show if user's answer exists AND is not correct AND is not empty
+                if (userAnswers[idx] && userAnswers[idx] !== q.options[q.correct] && userAnswers[idx].trim() !== q.options[q.correct].trim()) {
                     mistakes += `<div class='mistake-card'><b>Character:</b> ${q.options[q.correct]}<br><b>Your Answer:</b> ${userAnswers[idx]}<br><b>Correct Answer:</b> ${q.options[q.correct]}<br><span class='practice-tip'>Practice Tip: Try saying "${q.options[q.correct]}" for "${q.question.split("'")[1]}" slowly and listen to the pronunciation multiple times.</span></div>`;
                 }
             });
@@ -413,7 +429,6 @@
                     </div>
                 </div>
             `;
-
             // Send score to server
             fetch('/update-level-score', {
                 method: 'POST',
