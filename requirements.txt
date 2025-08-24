@@ -3,3 +3,6 @@ flask-sqlalchemy
 werkzeug
 gTTS
 pygame
+pymongo
+flask-pymongo
+python-dotenv
