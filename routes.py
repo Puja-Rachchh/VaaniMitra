@@ -245,6 +245,8 @@ def intermediate_level_quiz(level):
         return redirect(url_for('login'))
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
+    if level == 2:
+        return render_template('intermediate_level2_quiz.html')
     return render_template(f'intermediate_level{level}_quiz.html')
 
 @app.route('/update-level-score', methods=['POST'])
