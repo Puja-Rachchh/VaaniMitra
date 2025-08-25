@@ -212,14 +212,21 @@ def intermediate_levels():
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
 
-    # Get progress for Level 1 and Level 2
+    # Get progress for all levels
     progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
     progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
+    progress_level3 = UserProgress.get_level_progress(user._id, 'intermediate_level_3')
+    
     score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
     score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
+    score3 = int(progress_level3.score) if progress_level3 and progress_level3.score is not None else 0
+    
     passed_level1 = score1 >= 60
+    passed_level2 = score2 >= 60
 
-    return render_template('intermediate_levels.html', score1=score1, score2=score2, passed_level1=passed_level1)
+    return render_template('intermediate_levels.html', 
+                         score1=score1, score2=score2, score3=score3,
+                         passed_level1=passed_level1, passed_level2=passed_level2)
 
 @app.route('/intermediate/<int:level>')
 def intermediate_level(level):
@@ -238,16 +245,29 @@ def intermediate_level(level):
         print('User does not meet Hindi/Intermediate requirement')
         return render_template('intermediate_levels.html', error='You must select Hindi and Intermediate level to access this content.')
 
-    # Check if user passed Level 1 before allowing Level 2 access
+    # Check level prerequisites
     progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
+    progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
+    
     score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
+    score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
+    
+    # Level 2 requires Level 1 completion
     if level == 2 and score1 < 60:
         return redirect(url_for('intermediate_levels'))
+    
+    # Level 3 requires Level 2 completion
+    if level == 3 and score2 < 60:
+        return redirect(url_for('intermediate_levels'))
 
-    # Route Level 2 to animals page
+    # Route to specific level pages
     if level == 2:
         print('Rendering intermediate_level2.html')
         return render_template('intermediate_level2.html')
+    elif level == 3:
+        print('Rendering intermediate_level3.html')
+        return render_template('intermediate_level3.html')
+    
     print(f'Rendering intermediate_level{level}.html')
     return render_template(f'intermediate_level{level}.html')
 
@@ -261,8 +281,13 @@ def intermediate_level_quiz(level):
         return redirect(url_for('login'))
     if user.target_language != 'Hindi' or user.level != 'Intermediate':
         return redirect(url_for('home'))
+    
+    # Route to specific quiz pages
     if level == 2:
         return render_template('intermediate_level2_quiz.html')
+    elif level == 3:
+        return render_template('intermediate_level3_quiz.html')
+    
     return render_template(f'intermediate_level{level}_quiz.html')
 
 @app.route('/update-level-score', methods=['POST'])
