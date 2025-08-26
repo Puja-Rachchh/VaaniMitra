@@ -1,29 +1,7 @@
-<script>
-function playPronunciation(word) {
-    fetch('/play_hindi_letter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ letter: word })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Audio fetch failed');
-        return response.blob();
-    })
-    .then(blob => {
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.play();
-        audio.onended = () => URL.revokeObjectURL(url);
-    })
-    .catch(err => {
-        alert('Could not play sound: ' + err.message);
-    });
-}
-</script>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Intermediate Level 2 - Animals</title>
+    <title>Level 2: Animals - VaaniMitra</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -32,54 +10,92 @@ function playPronunciation(word) {
             min-height: 100vh;
             background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         }
+
         h1 {
             text-align: center;
             color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
             margin-bottom: 30px;
-            font-size: 2.2em;
+            font-size: 1.1em;
         }
         .animal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
+
         .animal-card {
             background: white;
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
         }
+
         .animal-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
-        .animal-card img {
-            width: 150px;
-            height: 150px;
+
+        .animal-image {
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             border-radius: 10px;
             margin-bottom: 15px;
+            border: 3px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        .animal-hindi {
-            font-size: 1.8em;
+
+        .animal-name {
+            font-size: 1.3em;
+            font-weight: bold;
             color: #2c3e50;
             margin-bottom: 5px;
         }
-        .animal-english {
+
+        .animal-hindi {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #6c5ce7;
+            margin-bottom: 10px;
+            font-family: 'Noto Sans Devanagari', Arial, sans-serif;
+        }
+
+        .animal-pronunciation {
+            font-size: 1.1em;
             color: #666;
-            font-size: 1em;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .audio-button {
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: transform 0.2s ease;
+        }
+
+        .audio-button:hover {
+            transform: scale(1.05);
         }
         .quiz-button {
             display: block;
@@ -119,203 +135,455 @@ function playPronunciation(word) {
         .nav-button:hover {
             background: #e9ecef;
         }
+
+        .progress-container {
+            background: linear-gradient(145deg, #ffffff, #f0f8ff);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            color: #2c3e50;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-percentage {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #6c5ce7;
+            text-shadow: 0 2px 4px rgba(108, 92, 231, 0.3);
+        }
+
+        .progress-count {
+            font-size: 1em;
+            color: #666;
+            background: rgba(108, 92, 231, 0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: 1px solid rgba(108, 92, 231, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background: linear-gradient(to right, #e9ecef, #f8f9fa);
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+            border-radius: 25px 25px 0 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #6c5ce7 50%, #a1c4fd 75%, #667eea 100%);
+            background-size: 200% 200%;
+            border-radius: 25px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Level 2 - Learn all Animals and Birds in Hindi.</h1>
-        <div style="text-align:right; margin-bottom:10px;">
-            <span style="color:#27ae60; font-weight:600; font-size:1.3em;">Score: <span style="font-weight:700;">{{ score2|default(0, true) }}/100</span></span>
+        <h1>Level 2: Learn Animals and Birds in Hindi</h1>
+        <div class="subtitle">Learn all animals and birds, then take the quiz!</div>
+        
+        <div class="progress-container">
+            <div class="progress-text">Learn all animals and birds to unlock the quiz!</div>
+            <div class="progress-stats">
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+                <div class="progress-count" id="progressCount">0/35 animals learned</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
         </div>
-        <h2 style="margin-top:40px;color:#27ae60;text-align:left;">Animals</h2>
+
+        <h2 style="margin-top:40px;color:#27ae60;text-align:left;font-size:1.8em;">Animals</h2>
         <div class="animal-grid" id="animalGrid">
-            <div class="animal-card">
-                <img src="/static/images/animals/dog.jpg" alt="Dog" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कुत्ता')">
+            <div class="animal-card" onclick="learnAnimal('कुत्ता', this)">
+                <img src="/static/images/animals/dog.jpg" alt="Dog" class="animal-image">
+                <div class="animal-name">Dog</div>
                 <div class="animal-hindi">कुत्ता</div>
-                <div class="animal-english">Dog</div>
+                <div class="animal-pronunciation">(Kutta)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/cat.jpg" alt="Cat" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बिल्ली')">
+            <div class="animal-card" onclick="learnAnimal('बिल्ली', this)">
+                <img src="/static/images/animals/cat.jpg" alt="Cat" class="animal-image">
+                <div class="animal-name">Cat</div>
                 <div class="animal-hindi">बिल्ली</div>
-                <div class="animal-english">Cat</div>
+                <div class="animal-pronunciation">(Billi)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/cow.jpg" alt="Cow" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गाय')">
+            <div class="animal-card" onclick="learnAnimal('गाय', this)">
+                <img src="/static/images/animals/cow.jpg" alt="Cow" class="animal-image">
+                <div class="animal-name">Cow</div>
                 <div class="animal-hindi">गाय</div>
-                <div class="animal-english">Cow</div>
+                <div class="animal-pronunciation">(Gaay)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/horse.jpg" alt="Horse" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('घोड़ा')">
+            <div class="animal-card" onclick="learnAnimal('घोड़ा', this)">
+                <img src="/static/images/animals/horse.jpg" alt="Horse" class="animal-image">
+                <div class="animal-name">Horse</div>
                 <div class="animal-hindi">घोड़ा</div>
-                <div class="animal-english">Horse</div>
+                <div class="animal-pronunciation">(Ghoda)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/goat.jpeg" alt="Goat" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बकरी')">
+            <div class="animal-card" onclick="learnAnimal('बकरी', this)">
+                <img src="/static/images/animals/goat.jpeg" alt="Goat" class="animal-image">
+                <div class="animal-name">Goat</div>
                 <div class="animal-hindi">बकरी</div>
-                <div class="animal-english">Goat</div>
+                <div class="animal-pronunciation">(Bakri)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/lion.jpg" alt="Lion" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('शेर')">
+            <div class="animal-card" onclick="learnAnimal('शेर', this)">
+                <img src="/static/images/animals/lion.jpg" alt="Lion" class="animal-image">
+                <div class="animal-name">Lion</div>
                 <div class="animal-hindi">शेर</div>
-                <div class="animal-english">Lion</div>
+                <div class="animal-pronunciation">(Sher)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/elephant.jpg" alt="Elephant" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('हाथी')">
+            <div class="animal-card" onclick="learnAnimal('हाथी', this)">
+                <img src="/static/images/animals/elephant.jpg" alt="Elephant" class="animal-image">
+                <div class="animal-name">Elephant</div>
                 <div class="animal-hindi">हाथी</div>
-                <div class="animal-english">Elephant</div>
+                <div class="animal-pronunciation">(Haathi)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/bear.jpg" alt="Bear" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('भालू')">
+            <div class="animal-card" onclick="learnAnimal('भालू', this)">
+                <img src="/static/images/animals/bear.jpg" alt="Bear" class="animal-image">
+                <div class="animal-name">Bear</div>
                 <div class="animal-hindi">भालू</div>
-                <div class="animal-english">Bear</div>
+                <div class="animal-pronunciation">(Bhaalu)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/monkey.jpg" alt="Monkey" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बंदर')">
+            <div class="animal-card" onclick="learnAnimal('बंदर', this)">
+                <img src="/static/images/animals/monkey.jpg" alt="Monkey" class="animal-image">
+                <div class="animal-name">Monkey</div>
                 <div class="animal-hindi">बंदर</div>
-                <div class="animal-english">Monkey</div>
+                <div class="animal-pronunciation">(Bandar)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/fox.jpg" alt="Fox" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('लोमड़ी')">
+            <div class="animal-card" onclick="learnAnimal('लोमड़ी', this)">
+                <img src="/static/images/animals/fox.jpg" alt="Fox" class="animal-image">
+                <div class="animal-name">Fox</div>
                 <div class="animal-hindi">लोमड़ी</div>
-                <div class="animal-english">Fox</div>
+                <div class="animal-pronunciation">(Lomdi)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/sheep.jpg" alt="Sheep" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('भेड़')">
+            <div class="animal-card" onclick="learnAnimal('भेड़', this)">
+                <img src="/static/images/animals/sheep.jpg" alt="Sheep" class="animal-image">
+                <div class="animal-name">Sheep</div>
                 <div class="animal-hindi">भेड़</div>
-                <div class="animal-english">Sheep</div>
+                <div class="animal-pronunciation">(Bhed)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/camel.jpeg" alt="Camel" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('ऊंट')">
+            <div class="animal-card" onclick="learnAnimal('ऊंट', this)">
+                <img src="/static/images/animals/camel.jpeg" alt="Camel" class="animal-image">
+                <div class="animal-name">Camel</div>
                 <div class="animal-hindi">ऊंट</div>
-                <div class="animal-english">Camel</div>
+                <div class="animal-pronunciation">(Oont)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/mouse.jpg" alt="Mouse" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('चूहा')">
+            <div class="animal-card" onclick="learnAnimal('चूहा', this)">
+                <img src="/static/images/animals/mouse.jpg" alt="Mouse" class="animal-image">
+                <div class="animal-name">Mouse</div>
                 <div class="animal-hindi">चूहा</div>
-                <div class="animal-english">Mouse</div>
+                <div class="animal-pronunciation">(Chuha)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/snake.jpg" alt="Snake" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('साँप')">
+            <div class="animal-card" onclick="learnAnimal('साँप', this)">
+                <img src="/static/images/animals/snake.jpg" alt="Snake" class="animal-image">
+                <div class="animal-name">Snake</div>
                 <div class="animal-hindi">साँप</div>
-                <div class="animal-english">Snake</div>
+                <div class="animal-pronunciation">(Saanp)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/fish.jpeg" alt="Fish" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('मछली')">
+            <div class="animal-card" onclick="learnAnimal('मछली', this)">
+                <img src="/static/images/animals/fish.jpeg" alt="Fish" class="animal-image">
+                <div class="animal-name">Fish</div>
                 <div class="animal-hindi">मछली</div>
-                <div class="animal-english">Fish</div>
+                <div class="animal-pronunciation">(Machhli)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/turtle.jpg" alt="Turtle" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कछुआ')">
+            <div class="animal-card" onclick="learnAnimal('कछुआ', this)">
+                <img src="/static/images/animals/turtle.jpg" alt="Turtle" class="animal-image">
+                <div class="animal-name">Turtle</div>
                 <div class="animal-hindi">कछुआ</div>
-                <div class="animal-english">Turtle</div>
+                <div class="animal-pronunciation">(Kachua)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/donkey.jpg" alt="Donkey" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गधा')">
+            <div class="animal-card" onclick="learnAnimal('गधा', this)">
+                <img src="/static/images/animals/donkey.jpg" alt="Donkey" class="animal-image">
+                <div class="animal-name">Donkey</div>
                 <div class="animal-hindi">गधा</div>
-                <div class="animal-english">Donkey</div>
+                <div class="animal-pronunciation">(Gadha)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/rabbit.jpg" alt="Rabbit" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('खरगोश')">
+            <div class="animal-card" onclick="learnAnimal('खरगोश', this)">
+                <img src="/static/images/animals/rabbit.jpg" alt="Rabbit" class="animal-image">
+                <div class="animal-name">Rabbit</div>
                 <div class="animal-hindi">खरगोश</div>
-                <div class="animal-english">Rabbit</div>
+                <div class="animal-pronunciation">(Khargosh)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/tiger.jpg" alt="Tiger" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बाघ')">
+            <div class="animal-card" onclick="learnAnimal('बाघ', this)">
+                <img src="/static/images/animals/tiger.jpg" alt="Tiger" class="animal-image">
+                <div class="animal-name">Tiger</div>
                 <div class="animal-hindi">बाघ</div>
-                <div class="animal-english">Tiger</div>
+                <div class="animal-pronunciation">(Baagh)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/rhino.jpeg" alt="Rhinoceros" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गैंडा')">
+            <div class="animal-card" onclick="learnAnimal('गैंडा', this)">
+                <img src="/static/images/animals/rhino.jpeg" alt="Rhinoceros" class="animal-image">
+                <div class="animal-name">Rhinoceros</div>
                 <div class="animal-hindi">गैंडा</div>
-                <div class="animal-english">Rhinoceros</div>
+                <div class="animal-pronunciation">(Gainda)</div>
             </div>
         </div>
         <h2 style="margin-top:40px;color:#6c5ce7;text-align:left;">Birds</h2>
         <div class="animal-grid" id="birdGrid">
-            <div class="animal-card">
-                <img src="/static/images/animals/parrot.jpg" alt="Parrot" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('तोता')">
+            <div class="animal-card" onclick="learnAnimal('तोता', this)">
+                <img src="/static/images/animals/parrot.jpg" alt="Parrot" class="animal-image">
+                <div class="animal-name">Parrot</div>
                 <div class="animal-hindi">तोता</div>
-                <div class="animal-english">Parrot</div>
+                <div class="animal-pronunciation">(Tota)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/peacock.jpg" alt="Peacock" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('मोर')">
+            <div class="animal-card" onclick="learnAnimal('मोर', this)">
+                <img src="/static/images/animals/peacock.jpg" alt="Peacock" class="animal-image">
+                <div class="animal-name">Peacock</div>
                 <div class="animal-hindi">मोर</div>
-                <div class="animal-english">Peacock</div>
+                <div class="animal-pronunciation">(Mor)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/crow.jpeg" alt="Crow" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कौआ')">
+            <div class="animal-card" onclick="learnAnimal('कौआ', this)">
+                <img src="/static/images/animals/crow.jpeg" alt="Crow" class="animal-image">
+                <div class="animal-name">Crow</div>
                 <div class="animal-hindi">कौआ</div>
-                <div class="animal-english">Crow</div>
+                <div class="animal-pronunciation">(Kaua)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/sparrow.jpeg" alt="Sparrow" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गौरैया')">
+            <div class="animal-card" onclick="learnAnimal('गौरैया', this)">
+                <img src="/static/images/animals/sparrow.jpeg" alt="Sparrow" class="animal-image">
+                <div class="animal-name">Sparrow</div>
                 <div class="animal-hindi">गौरैया</div>
-                <div class="animal-english">Sparrow</div>
+                <div class="animal-pronunciation">(Gauraiya)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/pigeon.jpg" alt="Pigeon" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कबूतर')">
+            <div class="animal-card" onclick="learnAnimal('कबूतर', this)">
+                <img src="/static/images/animals/pigeon.jpg" alt="Pigeon" class="animal-image">
+                <div class="animal-name">Pigeon</div>
                 <div class="animal-hindi">कबूतर</div>
-                <div class="animal-english">Pigeon</div>
+                <div class="animal-pronunciation">(Kabutar)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/duck.jpg" alt="Duck" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बत्तख')">
+            <div class="animal-card" onclick="learnAnimal('बत्तख', this)">
+                <img src="/static/images/animals/duck.jpg" alt="Duck" class="animal-image">
+                <div class="animal-name">Duck</div>
                 <div class="animal-hindi">बत्तख</div>
-                <div class="animal-english">Duck</div>
+                <div class="animal-pronunciation">(Battakh)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/hen.jpg" alt="Hen" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('मुर्गी')">
+            <div class="animal-card" onclick="learnAnimal('मुर्गी', this)">
+                <img src="/static/images/animals/hen.jpg" alt="Hen" class="animal-image">
+                <div class="animal-name">Hen</div>
                 <div class="animal-hindi">मुर्गी</div>
-                <div class="animal-english">Hen</div>
+                <div class="animal-pronunciation">(Murgi)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/owl.jpg" alt="Owl" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('उल्लू')">
+            <div class="animal-card" onclick="learnAnimal('उल्लू', this)">
+                <img src="/static/images/animals/owl.jpg" alt="Owl" class="animal-image">
+                <div class="animal-name">Owl</div>
                 <div class="animal-hindi">उल्लू</div>
-                <div class="animal-english">Owl</div>
+                <div class="animal-pronunciation">(Ullu)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/eagle.jpeg" alt="Eagle" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('गरुड़')">
-                <div class="animal-hindi">गरुड़</div>
-                <div class="animal-english">Eagle</div>
+            <div class="animal-card" onclick="learnAnimal('बाज', this)">
+                <img src="/static/images/animals/eagle.jpeg" alt="Eagle" class="animal-image">
+                <div class="animal-name">Eagle</div>
+                <div class="animal-hindi">बाज</div>
+                <div class="animal-pronunciation">(Baaz)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/butterfly.jpg" alt="Swallow" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('बुलबुल')">
+            <div class="animal-card" onclick="learnAnimal('तितली', this)">
+                <img src="/static/images/animals/butterfly.jpg" alt="Butterfly" class="animal-image">
+                <div class="animal-name">Butterfly</div>
                 <div class="animal-hindi">तितली</div>
-                <div class="animal-english">Butterfly</div>
+                <div class="animal-pronunciation">(Titli)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/woodpecker.jpeg" alt="Woodpecker" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('कठफोड़वा')">
+            <div class="animal-card" onclick="learnAnimal('कठफोड़वा', this)">
+                <img src="/static/images/animals/woodpecker.jpeg" alt="Woodpecker" class="animal-image">
+                <div class="animal-name">Woodpecker</div>
                 <div class="animal-hindi">कठफोड़वा</div>
-                <div class="animal-english">Woodpecker</div>
+                <div class="animal-pronunciation">(Kathphodwa)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/kingfisher.jpg" alt="Kingfisher" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('मछली मारने वाला पक्षी')">
-                <div class="animal-hindi">किंगफिशर</div>
-                <div class="animal-english">Kingfisher</div>
+            <div class="animal-card" onclick="learnAnimal('राजमछी', this)">
+                <img src="/static/images/animals/kingfisher.jpg" alt="Kingfisher" class="animal-image">
+                <div class="animal-name">Kingfisher</div>
+                <div class="animal-hindi">राजमछी</div>
+                <div class="animal-pronunciation">(Rajmachhi)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/flamingo.jpg" alt="Flamingo" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('फ्लेमिंगो')">
-                <div class="animal-hindi">फ्लेमिंगो</div>
-                <div class="animal-english">Flamingo</div>
+            <div class="animal-card" onclick="learnAnimal('राजहंस', this)">
+                <img src="/static/images/animals/flamingo.jpg" alt="Flamingo" class="animal-image">
+                <div class="animal-name">Flamingo</div>
+                <div class="animal-hindi">राजहंस</div>
+                <div class="animal-pronunciation">(Rajhans)</div>
             </div>
-            <div class="animal-card">
-                <img src="/static/images/animals/swan.JPG" alt="Swan" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('हंस')">
+            <div class="animal-card" onclick="learnAnimal('हंस', this)">
+                <img src="/static/images/animals/swan.JPG" alt="Swan" class="animal-image">
+                <div class="animal-name">Swan</div>
                 <div class="animal-hindi">हंस</div>
-                <div class="animal-english">Swan</div>
+                <div class="animal-pronunciation">(Hans)</div>
             </div>
-            <div class="animal-card">   
-                <img src="/static/images/animals/crane.jpg" alt="Crane" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;cursor:pointer;" onclick="playPronunciation('सारस')">
+            <div class="animal-card" onclick="learnAnimal('सारस', this)">   
+                <img src="/static/images/animals/crane.jpg" alt="Crane" class="animal-image">
+                <div class="animal-name">Crane</div>
                 <div class="animal-hindi">सारस</div>
-                <div class="animal-english">Crane</div>
+                <div class="animal-pronunciation">(Saras)</div>
             </div>
         </div>
             <div style="text-align:center; margin-top:40px;">
-        <a href="/intermediate/2/quiz" class="quiz-button">Take Quiz</a>
+        <a href="/intermediate/2/quiz" class="quiz-button" style="display: none;">Take Quiz</a>
         <div class="navigation">
             <a href="/intermediate" class="nav-button">← Back to Levels</a>
             <a href="/intermediate/3" class="nav-button">Next Level →</a>
         </div>
             </div>
     </div>
+
+    <script>
+        let learnedAnimals = new Set();
+        const totalAnimals = 35;
+
+        function updateProgress() {
+            const progress = (learnedAnimals.size / totalAnimals) * 100;
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressCount = document.getElementById('progressCount');
+            const progressFill = document.getElementById('progressFill');
+            
+            // Update progress fill with animation
+            progressFill.style.width = progress + '%';
+            
+            // Update percentage directly
+            progressPercentage.textContent = Math.round(progress) + '%';
+            
+            // Update count
+            progressCount.textContent = `${learnedAnimals.size}/${totalAnimals} animals learned`;
+            
+            if (progress === 100) {
+                document.querySelector('.quiz-button').style.display = 'block';
+                document.querySelector('.progress-text').textContent = 'Great! You\'ve learned all animals. Ready for the quiz?';
+                progressCount.textContent = 'All animals mastered! 🎉';
+                progressCount.style.background = 'linear-gradient(135deg, #6c5ce7, #a1c4fd)';
+                progressCount.style.color = 'white';
+            } else {
+                document.querySelector('.progress-text').textContent = 'Learn all animals and birds to unlock the quiz!';
+                document.querySelector('.quiz-button').style.display = 'none';
+            }
+        }
+
+        function learnAnimal(animalName, cardElement) {
+            learnedAnimals.add(animalName);
+            updateProgress();
+            
+            // Visual feedback
+            cardElement.style.background = '#f0f8ff';
+            cardElement.style.border = '2px solid #6c5ce7';
+            
+            // Play pronunciation automatically when card is clicked
+            playAudio(animalName);
+        }
+
+        function playAudio(text) {
+            // Create audio using Web Speech API or fetch from server
+            try {
+                // Try to use browser's speech synthesis first
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'hi-IN';
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                } else {
+                    // Fallback to server-generated audio
+                    const audio = new Audio(`/generate-audio?text=${encodeURIComponent(text)}`);
+                    audio.play().catch(e => console.log('Audio playback failed:', e));
+                }
+            } catch (error) {
+                console.log('Audio not available:', error);
+                // Visual feedback when audio isn't available
+                alert(`Pronunciation: ${text}`);
+            }
+        }
+
+        function playPronunciation(word) {
+            fetch('/play_hindi_letter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ letter: word })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Audio fetch failed');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play();
+                audio.onended = () => URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.log('Could not play sound: ' + err.message);
+            });
+        }
+
+        // Initialize progress on page load
+        updateProgress();
+    </script>
 </body>
 </html>
 
