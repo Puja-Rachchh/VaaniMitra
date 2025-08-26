@@ -12,9 +12,10 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
+            margin-right: 220px; /* Space for sidepanel */
         }
 
         h1 {
@@ -55,17 +56,25 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-right: 20px;
+            }
+            .side-panel {
+                right: 10px !important;
+                width: 160px !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container" style="display: flex;">
-        <div style="flex: 1;">
-            <h1>Hindi Letters (वर्णमाला)</h1>
-            <div class="letters-grid" id="lettersGrid">
-                <!-- Letters will be added dynamically via JavaScript -->
-            </div>
+    <div class="container">
+        <h1>Hindi Letters (वर्णमाला)</h1>
+        <div class="letters-grid" id="lettersGrid">
+            <!-- Letters will be added dynamically via JavaScript -->
         </div>
-        <div class="side-panel" id="sidePanel" style="width:180px; height:200px; background:#fff; box-shadow:-2px 0 8px rgba(0,0,0,0.08); padding:18px 10px; display:none; flex-direction:column; align-items:center; justify-content:center; border-radius:10px;">
+        <div class="side-panel" id="sidePanel" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); width:180px; height:200px; background:#fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding:18px 10px; display:none; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; z-index: 1000;">
             <div class="current-letter" id="currentLetter" style="font-size:2.5rem; margin-bottom:18px;"></div>
             <div class="current-name" id="currentName" style="font-size: 1.5rem"></div>
             <button class="next-btn" id="nextBtn" style="padding:7px 18px; font-size:1rem; background:#198754; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px;">Next</button>
