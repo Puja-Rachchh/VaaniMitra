@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Level 5 - Relations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        .relation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+        .relation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .relation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .relation-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .relation-hindi {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .relation-english {
+            color: #666;
+            font-size: 1em;
+        }
+        .quiz-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+        }
+        .progress-bar {
+            height: 12px;
+            background: #eee;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            border-radius: 6px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+    </style>
+    <script>
+    function playPronunciation(word) {
+        fetch('/play_hindi_letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ letter: word })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Audio fetch failed');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play();
+            audio.onended = () => URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            alert('Could not play sound: ' + err.message);
+        });
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Level 5 - Learn Hindi Names for Relations</h1>
+        <div style="background:#f8fbff; border-radius:18px; box-shadow:0 2px 8px #e3f6fc; padding:32px 24px 24px 24px; margin-bottom:32px; position:relative;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:2em; color:#6c5ce7; font-weight:600;"> <span id="progressPercent">0%</span> </span>
+                <span style="font-size:1.1em; color:#34495e; background:#e3f6fc; border-radius:16px; padding:6px 16px;"> <span id="progressCount">0/10 relations learned</span> </span>
+            </div>
+            <div style="text-align:center; font-size:1.2em; color:#2c3e50; margin:18px 0 10px 0; font-weight:500;">Complete all relations to unlock the quiz!</div>
+            <div style="width:100%; height:16px; background:#ececec; border-radius:8px; margin-top:8px;">
+                <div id="progressFill" style="height:100%; width:0%; background:linear-gradient(90deg,#6c5ce7,#a1c4fd); border-radius:8px; transition:width 0.3s;"></div>
+            </div>
+        </div>
+        <div class="relation-grid" id="relationGrid">
+            <div class="relation-card" onclick="handleCardClick(this, 'माँ')">
+                <img src="/static/images/relations/mother.jpg" alt="Mother">
+                <div class="relation-hindi">माँ</div>
+                <div class="relation-english">Mother</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'पिता')">
+                <img src="/static/images/relations/father.jpg" alt="Father">
+                <div class="relation-hindi">पिता</div>
+                <div class="relation-english">Father</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'चाचा')">
+                <img src="/static/images/relations/uncle.jpg" alt="Uncle">
+                <div class="relation-hindi">चाचा</div>
+                <div class="relation-english">Uncle</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'चाची')">
+                <img src="/static/images/relations/aunty.jpg" alt="Aunty">
+                <div class="relation-hindi">चाची</div>
+                <div class="relation-english">Aunty</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'बहन')">
+                <img src="/static/images/relations/sister.jpg" alt="Sister">
+                <div class="relation-hindi">बहन</div>
+                <div class="relation-english">Sister</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'भाई')">
+                <img src="/static/images/relations/brother.jpg" alt="Brother">
+                <div class="relation-hindi">भाई</div>
+                <div class="relation-english">Brother</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'दादी')">
+                <img src="/static/images/relations/grandmother.jpg" alt="Grandmother">
+                <div class="relation-hindi">दादी</div>
+                <div class="relation-english">Grandmother</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'दादा')">
+                <img src="/static/images/relations/grandfather.jpg" alt="Grandfather">
+                <div class="relation-hindi">दादा</div>
+                <div class="relation-english">Grandfather</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'बेटा')">
+                <img src="/static/images/relations/son.jpg" alt="Son">
+                <div class="relation-hindi">बेटा</div>
+                <div class="relation-english">Son</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'बेटी')">
+                <img src="/static/images/relations/daughter.jpg" alt="Daughter">
+                <div class="relation-hindi">बेटी</div>
+                <div class="relation-english">Daughter</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'पति-पत्नी')">
+                <img src="/static/images/relations/husband-wife.jpg" alt="Husband and Wife">
+                <div class="relation-hindi">पति-पत्नी</div>
+                <div class="relation-english">Husband and Wife</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'पोता')">
+                <img src="/static/images/relations/grandson.jpg" alt="Grandson">
+                <div class="relation-hindi">पोता</div>
+                <div class="relation-english">Grandson</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'पोती')">
+                <img src="/static/images/relations/granddaughter.jpg" alt="Granddaughter">
+                <div class="relation-hindi">पोती</div>
+                <div class="relation-english">Granddaughter</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'भतीजा')">
+                <img src="/static/images/relations/nephew.jpg" alt="Nephew">
+                <div class="relation-hindi">भतीजा</div>
+                <div class="relation-english">Nephew</div>
+            </div>
+            <div class="relation-card" onclick="handleCardClick(this, 'भतीजी')">
+                <img src="/static/images/relations/niece.jpg" alt="Niece">
+                <div class="relation-hindi">भतीजी</div>
+                <div class="relation-english">Niece</div>
+            </div>
+        </div>
+        <a href="/intermediate/5/quiz" class="quiz-button" id="quizBtn" style="display:none;">Take Quiz</a>
+    </div>
+    <script>
+    const relations = [
+        'माँ','पिता','चाचा','चाची','बहन','भाई','दादी','दादा','बेटा','बेटी','पति-पत्नी','पोता','पोती','भतीजा','भतीजी'
+    ];
+    let clicked = {};
+    relations.forEach(r => clicked[r]=false);
+    let total = relations.length;
+    let count = 0;
+    function playPronunciation(word) {
+        fetch('/play_hindi_letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ letter: word })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Audio fetch failed');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play();
+            audio.onended = () => URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            alert('Could not play sound: ' + err.message);
+        });
+    }
+    function handleCardClick(card, word) {
+        playPronunciation(word);
+        if (!clicked[word]) {
+            clicked[word] = true;
+            card.style.background = '#e3f6fc';
+            card.style.boxShadow = '0 0 0 4px #6c5ce744';
+            count++;
+            document.getElementById('progressCount').textContent = count + '/' + total + ' relations learned';
+            let percent = Math.round((count/total)*100);
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+            if (count === total) {
+                document.getElementById('quizBtn').style.display = 'block';
+            }
+        }
+    }
+    </script>
+</body>
+</html>

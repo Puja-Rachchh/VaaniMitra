@@ -216,17 +216,24 @@ def intermediate_levels():
     progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
     progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
     progress_level3 = UserProgress.get_level_progress(user._id, 'intermediate_level_3')
+    progress_level4 = UserProgress.get_level_progress(user._id, 'intermediate_level_4')
+    progress_level5 = UserProgress.get_level_progress(user._id, 'intermediate_level_5')
     
     score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
     score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
     score3 = int(progress_level3.score) if progress_level3 and progress_level3.score is not None else 0
+    score4 = int(progress_level4.score) if progress_level4 and progress_level4.score is not None else 0
+    score5 = int(progress_level5.score) if progress_level5 and progress_level5.score is not None else 0
     
     passed_level1 = score1 >= 60
     passed_level2 = score2 >= 60
+    passed_level3 = score3 >= 60
+    passed_level4 = score4 >= 60
+    passed_level5 = score5 >= 60
 
     return render_template('intermediate_levels.html', 
-                         score1=score1, score2=score2, score3=score3,
-                         passed_level1=passed_level1, passed_level2=passed_level2)
+                         score1=score1, score2=score2, score3=score3, score4=score4, score5=score5,
+                         passed_level1=passed_level1, passed_level2=passed_level2, passed_level3=passed_level3, passed_level4=passed_level4, passed_level5=passed_level5)
 
 @app.route('/intermediate/<int:level>')
 def intermediate_level(level):
@@ -248,18 +255,19 @@ def intermediate_level(level):
     # Check level prerequisites
     progress_level1 = UserProgress.get_level_progress(user._id, 'intermediate_level_1')
     progress_level2 = UserProgress.get_level_progress(user._id, 'intermediate_level_2')
-    
+    progress_level3 = UserProgress.get_level_progress(user._id, 'intermediate_level_3')
     score1 = int(progress_level1.score) if progress_level1 and progress_level1.score is not None else 0
     score2 = int(progress_level2.score) if progress_level2 and progress_level2.score is not None else 0
-    
+    score3 = int(progress_level3.score) if progress_level3 and progress_level3.score is not None else 0
     # Level 2 requires Level 1 completion
     if level == 2 and score1 < 60:
         return redirect(url_for('intermediate_levels'))
-    
     # Level 3 requires Level 2 completion
     if level == 3 and score2 < 60:
         return redirect(url_for('intermediate_levels'))
-
+    # Level 4 requires Level 3 completion
+    if level == 4 and score3 < 60:
+        return redirect(url_for('intermediate_levels'))
     # Route to specific level pages
     if level == 2:
         print('Rendering intermediate_level2.html')
@@ -267,7 +275,9 @@ def intermediate_level(level):
     elif level == 3:
         print('Rendering intermediate_level3.html')
         return render_template('intermediate_level3.html')
-    
+    elif level == 4:
+        print('Rendering intermediate_level4.html')
+        return render_template('intermediate_level4.html')
     print(f'Rendering intermediate_level{level}.html')
     return render_template(f'intermediate_level{level}.html')
 
