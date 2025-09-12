@@ -156,8 +156,8 @@
             <!-- Level 1 -->
             <div class="level-card unlocked" onclick="window.location.href='/intermediate/1'">
                 <div class="level-number">Level 1</div>
-                <div class="level-title">Fruits</div>
-                <div class="level-description">Learn Hindi names for common fruits with pronunciation.</div>
+                <div class="level-title">Fruits and Vegetables</div>
+                <div class="level-description">Learn Hindi names for common fruits and vegetables with pronunciation.</div>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: {{ score1|default(0, true) }}%"></div>
                 </div>
@@ -171,8 +171,8 @@
             {% if passed_level1 %}
             <div class="level-card unlocked" onclick="window.location.href='/intermediate/2'">
                 <div class="level-number">Level 2</div>
-                <div class="level-title">Animals</div>
-                <div class="level-description">Learn Hindi names for common animals with pronunciation and images.</div>
+                <div class="level-title">Animals and Birds</div>
+                <div class="level-description">Learn Hindi names for common animals and Birds with pronunciation and images.</div>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: {{ score2|default(0, true) }}%"></div>
                 </div>
@@ -228,19 +228,66 @@
             {% endif %}
 
             <!-- Level 4 -->
-            <div class="level-card locked">
+            {% if passed_level3 %}
+            <div class="level-card unlocked" onclick="window.location.href='/intermediate/4'">
+                <div class="level-number">Level 4</div>
+                <div class="level-title">Professionals</div>
+                <div class="level-description">Learn Hindi names for common professionals with pronunciation and images.</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score4|default(0, true) }}%"></div>
+                </div>
+                <div class="level-status">
+                    <span class="status-tag status-inprogress">In Progress</span>
+                    <span class="level-score">Score: {{ score4|default(0, true) }}/100</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="level-card locked" style="pointer-events:none;">
                 <div class="lock-icon">🔒</div>
                 <div class="level-number">Level 4</div>
-                <div class="level-title">Grammar Basics</div>
-                <div class="level-description">Learn fundamental Hindi grammar rules and sentence structure.</div>
+                <div class="level-title">Professionals</div>
+                <div class="level-description">You must score at least 3/5 (60%) in Level 3 to unlock this level.</div>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 0%"></div>
                 </div>
                 <div class="level-status">
                     <span class="status-tag status-locked">Locked</span>
-                    <span class="level-score">Score: -</span>
+                    <span class="level-score">Score: 0/100</span>
                 </div>
             </div>
+            {% endif %}
+
+            <!-- Level 5 -->
+            {% if passed_level4 %}
+            <div class="level-card unlocked" onclick="window.location.href='/intermediate/5'">
+                <div class="level-number">Level 5</div>
+                <div class="level-title">Relations</div>
+                <div class="level-description">Learn Hindi names for family relations with pronunciation and images.</div>
+                <div class="progress-bar">
+                    {% set score5 = score5|default(0, true) %}
+                    {% set progress5 = score5 %}
+                    <div class="progress-fill" style="width: {{ progress5 }}%"></div>
+                </div>
+                <div class="level-status">
+                    <span class="status-tag status-inprogress">In Progress</span>
+                    <span class="level-score">Score: {{ score5|default(0, true) }}/100</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="level-card locked" style="pointer-events:none;">
+                <div class="lock-icon">🔒</div>
+                <div class="level-number">Level 5</div>
+                <div class="level-title">Relations</div>
+                <div class="level-description">You must score at least 3/5 (60%) in Level 4 to unlock this level.</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="level-status">
+                    <span class="status-tag status-locked">Locked</span>
+                    <span class="level-score">Score: 0/100</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </body>
