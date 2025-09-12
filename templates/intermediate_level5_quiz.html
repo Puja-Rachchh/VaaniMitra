@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Level 5 Quiz - Relations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .quiz-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #a1c4fd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .option:hover {
+            background: #f0f7ff;
+            border-color: #6c5ce7;
+        }
+        .option.selected {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+        .option.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        .option.incorrect {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        #progressBar {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .result {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .score {
+            font-size: 2em;
+            color: #6c5ce7;
+            margin: 20px 0;
+        }
+        .button {
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .report-container {
+            background: linear-gradient(135deg, #f7faff 0%, #e3f6fc 100%);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(44,62,80,0.08);
+            padding: 40px 30px;
+            max-width: 600px;
+            margin: 30px auto;
+            animation: fadeIn 0.7s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .report-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 18px;
+        }
+        .emoji { font-size: 1.1em; }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin: 0 auto 18px auto;
+            box-shadow: 0 4px 16px #a1c4fd44;
+        }
+        .accuracy {
+            font-size: 1.2em;
+            margin-bottom: 18px;
+            color: #34495e;
+        }
+        .accuracy span {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .report-cards {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .report-card {
+            background: #fff;
+            padding: 16px 22px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px #eee;
+            min-width: 180px;
+        }
+        .performance-text {
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+        .mistakes-section {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .mistake-card {
+            background: #ffeaea;
+            border-left: 5px solid #e74c3c;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px #f7cac9;
+        }
+        .practice-tip {
+            display: block;
+            background: #e3f6fc;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-top: 6px;
+            color: #2c3e50;
+            font-size: 0.98em;
+        }
+        .no-mistakes {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .suggestions-section {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .suggestions-section ul {
+            padding-left: 18px;
+        }
+        .suggestions-section li {
+            margin-bottom: 6px;
+            color: #34495e;
+        }
+        .report-actions {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relations Quiz</h1>
+        <div id="quizArea"></div>
+    </div>
+    <script>
+    const relations = [
+        { hindi: 'माँ', english: 'Mother', image: '/static/images/relations/mother.jpg' },
+        { hindi: 'पिता', english: 'Father', image: '/static/images/relations/father.jpg' },
+        { hindi: 'चाचा', english: 'Uncle', image: '/static/images/relations/uncle.jpg' },
+        { hindi: 'चाची', english: 'Aunty', image: '/static/images/relations/aunty.jpg' },
+        { hindi: 'बहन', english: 'Sister', image: '/static/images/relations/sister.jpg' },
+        { hindi: 'भाई', english: 'Brother', image: '/static/images/relations/brother.jpg' },
+        { hindi: 'दादी', english: 'Grandmother', image: '/static/images/relations/grandmother.jpg' },
+        { hindi: 'दादा', english: 'Grandfather', image: '/static/images/relations/grandfather.jpg' },
+        { hindi: 'बेटा', english: 'Son', image: '/static/images/relations/son.jpg' },
+        { hindi: 'बेटी', english: 'Daughter', image: '/static/images/relations/daughter.jpg' },
+        { hindi: 'पति-पत्नी', english: 'Husband and Wife', image: '/static/images/relations/husband-wife.jpg' },
+        { hindi: 'पोता', english: 'Grandson', image: '/static/images/relations/grandson.jpg' },
+        { hindi: 'पोती', english: 'Granddaughter', image: '/static/images/relations/granddaughter.jpg' },
+        { hindi: 'भतीजा', english: 'Nephew', image: '/static/images/relations/nephew.jpg' },
+        { hindi: 'भतीजी', english: 'Niece', image: '/static/images/relations/niece.jpg' },
+    ];
+    let score = 0;
+    let current = 0;
+    let quizOrder = [];
+    let userAnswers = [];
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+    function startQuiz() {
+        score = 0;
+        current = 0;
+        quizOrder = [...relations];
+        shuffle(quizOrder);
+        quizOrder = quizOrder.slice(0, 5); // Only 5 random questions
+        showQuestion();
+    }
+    function showQuestion() {
+        if (current >= quizOrder.length) {
+            showReport();
+            return;
+        }
+        const rel = quizOrder[current];
+        // Pick 3 random wrong options
+        let options = [rel];
+        let wrongs = relations.filter(a => a !== rel);
+        shuffle(wrongs);
+        options = options.concat(wrongs.slice(0, 3));
+        shuffle(options);
+        let html = `<img class='quiz-image' src='${rel.image}' alt='${rel.english}'>`;
+        html += `<div class='options'>`;
+        options.forEach(opt => {
+            html += `<div class='option' onclick='chooseOption(this, "${opt.hindi}", "${rel.hindi}")'>${opt.hindi}</div>`;
+        });
+        html += `</div>`;
+        document.getElementById('quizArea').innerHTML = html;
+    }
+    function chooseOption(element, selected, correct) {
+        const options = document.querySelectorAll('.option');
+        options.forEach(option => option.onclick = null);
+        userAnswers[current] = selected;
+        if (selected === correct) {
+            element.classList.add('correct');
+            score++;
+        } else {
+            element.classList.add('incorrect');
+            options.forEach(option => {
+                if (option.textContent === correct) {
+                    option.classList.add('correct');
+                }
+            });
+        }
+        setTimeout(() => {
+            current++;
+            showQuestion();
+        }, 1200);
+    }
+    function showReport() {
+        let accuracy = Math.round((score / quizOrder.length) * 100);
+        let mistakes = '';
+        quizOrder.forEach((rel, idx) => {
+            if (userAnswers[idx] && userAnswers[idx] !== rel.hindi && userAnswers[idx].trim() !== rel.hindi.trim()) {
+                mistakes += `<div class='mistake-card'><b>Relation:</b> ${rel.english}<br><b>Your Answer:</b> ${userAnswers[idx]}<br><b>Correct Answer:</b> ${rel.hindi}<br><span class='practice-tip'>Practice Tip: Try saying "${rel.hindi}" for "${rel.english}" slowly and listen to the pronunciation multiple times.</span></div>`;
+            }
+        });
+        let reportHtml = `
+        <div class='report-container'>
+            <h2 class='report-title'>Quiz Results <span class='emoji'>🎓</span></h2>
+            <div class='score-circle'>${score}/${quizOrder.length}</div>
+            <div class='accuracy'>Accuracy: <span>${accuracy}%</span></div>
+            <div class='report-cards'>
+                <div class='report-card'>
+                    <b>Performance <span class='emoji'>📖</span></b><br>
+                    <span class='performance-text'>${accuracy >= 80 ? 'Outstanding! You have excellent understanding.' : 'Keep practicing to improve your score!'}</span>
+                </div>
+                <div class='report-card'>
+                    <b>Statistics <span class='emoji'>📝</span></b><br>
+                    <span>Total Questions: ${quizOrder.length}</span><br>
+                    <span>Correct Answers: ${score}</span><br>
+                    <span>Incorrect Answers: ${quizOrder.length - score}</span>
+                </div>
+            </div>
+            <div class='mistakes-section'>
+                <b>Review Your Mistakes:</b><br>
+                ${mistakes ? mistakes : '<span class="no-mistakes">No mistakes! Great job!</span>'}
+            </div>
+            <div class='suggestions-section'>
+                <b>Improvement Suggestions:</b>
+                <ul>
+                    <li>Listen to each pronunciation multiple times before answering</li>
+                    <li>Practice speaking the sounds out loud after hearing them</li>
+                    <li>Focus on the relations you found challenging</li>
+                </ul>
+            </div>
+            <div class='report-actions'>
+                <button class='button' onclick='window.location.reload()'>Try Another Quiz</button>
+                <a href='/intermediate' class='button' style='text-decoration:none;'>Back to Home 🏠</a>
+            </div>
+        </div>
+        `;
+        document.getElementById('quizArea').innerHTML = reportHtml;
+        // Send score to server (MongoDB)
+        fetch('/update-level-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                level: 5,
+                score: accuracy
+            })
+        });
+    }
+    startQuiz();
+    </script>
+</body>
+</html>
