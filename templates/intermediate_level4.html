@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Level 4 - Professionals</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        .prof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+        .prof-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .prof-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .prof-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .prof-hindi {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .prof-english {
+            color: #666;
+            font-size: 1em;
+        }
+        .quiz-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+        }
+        .progress-bar {
+            height: 12px;
+            background: #eee;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            border-radius: 6px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Level 4 - Learn Hindi Names for Professionals</h1>
+        <div style="background:#f8fbff; border-radius:18px; box-shadow:0 2px 8px #e3f6fc; padding:32px 24px 24px 24px; margin-bottom:32px; position:relative;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:2em; color:#6c5ce7; font-weight:600;"> <span id="progressPercent">0%</span> </span>
+                <span style="font-size:1.1em; color:#34495e; background:#e3f6fc; border-radius:16px; padding:6px 16px;"> <span id="progressCount">0/10 professionals learned</span> </span>
+            </div>
+            <div style="text-align:center; font-size:1.2em; color:#2c3e50; margin:18px 0 10px 0; font-weight:500;">Complete all professionals to unlock the quiz!</div>
+            <div style="width:100%; height:16px; background:#ececec; border-radius:8px; margin-top:8px;">
+                <div id="progressFill" style="height:100%; width:0%; background:linear-gradient(90deg,#6c5ce7,#a1c4fd); border-radius:8px; transition:width 0.3s;"></div>
+            </div>
+        </div>
+        <div class="prof-grid" id="profGrid">
+            <div class="prof-card" onclick="handleCardClick(this, 'डॉक्टर')">
+                <img src="/static/images/professionals/doctor.jpg" alt="Doctor">
+                <div class="prof-hindi">डॉक्टर</div>
+                <div class="prof-english">Doctor</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'पुलिस')">
+                <img src="/static/images/professionals/police.jpg" alt="Police">
+                <div class="prof-hindi">पुलिस</div>
+                <div class="prof-english">Police</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'शिक्षक')">
+                <img src="/static/images/professionals/teacher.jpg" alt="Teacher">
+                <div class="prof-hindi">शिक्षक</div>
+                <div class="prof-english">Teacher</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'इंजीनियर')">
+                <img src="/static/images/professionals/engineer.jpg" alt="Engineer">
+                <div class="prof-hindi">इंजीनियर</div>
+                <div class="prof-english">Engineer</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'नर्स')">
+                <img src="/static/images/professionals/nurse.jpg" alt="Nurse">
+                <div class="prof-hindi">नर्स</div>
+                <div class="prof-english">Nurse</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'वकील')">
+                <img src="/static/images/professionals/lawyer.jpeg" alt="Lawyer">
+                <div class="prof-hindi">वकील</div>
+                <div class="prof-english">Lawyer</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'किसान')">
+                <img src="/static/images/professionals/farmer.jpg" alt="Farmer">
+                <div class="prof-hindi">किसान</div>
+                <div class="prof-english">Farmer</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'बैंक कर्मचारी')">
+                <img src="/static/images/professionals/banker.jpg" alt="Banker">
+                <div class="prof-hindi">बैंक कर्मचारी</div>
+                <div class="prof-english">Banker</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'ड्राइवर')">
+                <img src="/static/images/professionals/driver.jpeg" alt="Driver">
+                <div class="prof-hindi">ड्राइवर</div>
+                <div class="prof-english">Driver</div>
+            </div>
+            <div class="prof-card" onclick="handleCardClick(this, 'रसोइया')">
+                <img src="/static/images/professionals/chef.jpg" alt="Chef">
+                <div class="prof-hindi">रसोइया</div>
+                <div class="prof-english">Chef</div>
+            </div>
+        </div>
+        <a href="/intermediate/4/quiz" class="quiz-button" id="quizBtn" style="display:none;">Take Quiz</a>
+    </div>
+    <script>
+    const professionals = [
+        'डॉक्टर','पुलिस','शिक्षक','इंजीनियर','नर्स','वकील','किसान','बैंक कर्मचारी','ड्राइवर','रसोइया'
+    ];
+    let clicked = {};
+    professionals.forEach(p => clicked[p]=false);
+    let total = professionals.length;
+    let count = 0;
+    function playPronunciation(word) {
+        fetch('/play_hindi_letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ letter: word })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Audio fetch failed');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play();
+            audio.onended = () => URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            alert('Could not play sound: ' + err.message);
+        });
+    }
+    function handleCardClick(card, word) {
+        playPronunciation(word);
+        if (!clicked[word]) {
+            clicked[word] = true;
+            card.style.background = '#e3f6fc';
+            card.style.boxShadow = '0 0 0 4px #6c5ce744';
+            count++;
+            document.getElementById('progressCount').textContent = count + '/' + total + ' professionals learned';
+            let percent = Math.round((count/total)*100);
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+            if (count === total) {
+                document.getElementById('quizBtn').style.display = 'block';
+            }
+        }
+    }
+    </script>
+</body>
+</html>
