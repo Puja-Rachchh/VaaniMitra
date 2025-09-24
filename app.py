@@ -36,6 +36,7 @@ def load_user(user_id):
 # Import routes after creating app and mongo to avoid circular imports
 from routes import *
 from game_routes import *
+# from translation_routes import *  # Commented out to avoid conflicts - enhanced routes in routes.py
 
 if __name__ == '__main__':
     app.run(debug=True)

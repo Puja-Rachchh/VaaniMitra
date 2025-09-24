@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Level 1: Fruits and Vegetables - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .language-selector select {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #2c3e50;
+            cursor: pointer;
+            outline: none;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 25px;
+            color: #2c3e50;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .vocab-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .vocab-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .vocab-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 3px solid #f0f0f0;
+        }
+
+        .vocab-name-english {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .vocab-name-translated {
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .vocab-pronunciation {
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .play-audio-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .play-audio-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .quiz-button {
+            display: block;
+            width: 250px;
+            margin: 40px auto;
+            padding: 18px 30px;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            padding: 40px;
+        }
+
+        .error {
+            text-align: center;
+            color: #e74c3c;
+            font-size: 1.1em;
+            padding: 40px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #6c5ce7, #a1c4fd);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #2c3e50;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <a href="{{ url_for('intermediate_levels') }}" class="back-button">← Back to Levels</a>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="bengali">বাংলা</option>
+            <option value="tamil">தமிழ்</option>
+            <option value="telugu">తెలుగు</option>
+            <option value="marathi">मराठी</option>
+            <option value="gujarati">ગુજરાતી</option>
+            <option value="kannada">ಕನ್ನಡ</option>
+            <option value="malayalam">മലയാളം</option>
+            <option value="punjabi">ਪੰਜਾਬੀ</option>
+            <option value="urdu">اردو</option>
+            <option value="assamese">অসমীয়া</option>
+            <option value="odia">ଓଡ଼ିଆ</option>
+            <option value="nepali">नेपाली</option>
+            <option value="sindhi">سنڌي</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <h1 id="pageTitle">Level 1: Fruits and Vegetables</h1>
+        <div class="description" id="pageDescription">
+            Learn names for common fruits and vegetables with pronunciation and practice.
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="tab-button active" onclick="showCategory('fruits')" id="fruitsTab">
+                Fruits
+            </button>
+            <button class="tab-button" onclick="showCategory('vegetables')" id="vegetablesTab">
+                Vegetables
+            </button>
+        </div>
+
+        <!-- Vocabulary Grid -->
+        <div class="vocabulary-grid" id="vocabularyGrid">
+            <div class="loading">Loading vocabulary...</div>
+        </div>
+
+        <!-- Quiz Button -->
+        <a href="{{ url_for('intermediate_level_quiz', level=1) }}" class="quiz-button" id="quizButton">
+            Take Quiz
+        </a>
+    </div>
+
+    <script>
+        let currentLanguage = 'english';
+        let currentCategory = 'fruits';
+        let vocabularyData = {};
+        let translatedContent = {};
+
+        // Translations for UI elements
+        const uiTranslations = {
+            pageTitle: {
+                english: "Level 1: Fruits and Vegetables",
+                hindi: "स्तर 1: फल और सब्जियां",
+                bengali: "স্তর ১: ফল এবং সবজি",
+                tamil: "நிலை 1: பழங்கள் மற்றும் காய்கறிகள்",
+                telugu: "స్థాయి 1: పండ్లు మరియు కూరగాయలు",
+                marathi: "स्तर 1: फळे आणि भाजी",
+                gujarati: "સ્તર 1: ફળો અને શાકભાજી",
+                kannada: "ಹಂತ 1: ಹಣ್ಣುಗಳು ಮತ್ತು ತರಕಾರಿಗಳು",
+                malayalam: "തലം 1: പഴങ്ങളും പച്ചക്കറികളും",
+                punjabi: "ਪੱਧਰ 1: ਫਲ ਅਤੇ ਸਬਜ਼ੀਆਂ",
+                urdu: "درجہ 1: پھل اور سبزیاں",
+                assamese: "স্তৰ ১: ফল আৰু পাচলি",
+                odia: "ସ୍ତର ୧: ଫଳ ଏବଂ ପନିପରିବା",
+                nepali: "तह 1: फलफूल र तरकारी",
+                sindhi: "درجو 1: ميوا ۽ ڀاڄيون"
+            },
+            pageDescription: {
+                english: "Learn names for common fruits and vegetables with pronunciation and practice.",
+                hindi: "उच्चारण और अभ्यास के साथ आम फलों और सब्जियों के नाम सीखें।",
+                bengali: "উচ্চারণ এবং অনুশীলন সহ সাধারণ ফল এবং সবজির নাম শিখুন।",
+                tamil: "உச்சரிப்பு மற்றும் பயிற்சியுடன் பொதுவான பழங்கள் மற்றும் காய்கறிகளின் பெயர்களைக் கற்றுக்கொள்ளுங்கள்।",
+                telugu: "ఉచ్చారణ మరియు అభ్యాసంతో సాధారణ పండ్లు మరియు కూరగాయల పేర్లను నేర్చుకోండి।",
+                marathi: "उच्चार आणि सराव सह सामान्य फळे आणि भाज्यांची नावे शिका।",
+                gujarati: "ઉચ્ચારણ અને અભ્યાસ સાથે સામાન્ય ફળો અને શાકભાજીના નામ શીખો।",
+                kannada: "ಉಚ್ಚಾರಣೆ ಮತ್ತು ಅಭ್ಯಾಸದೊಂದಿಗೆ ಸಾಮಾನ್ಯ ಹಣ್ಣುಗಳು ಮತ್ತು ತರಕಾರಿಗಳ ಹೆಸರುಗಳನ್ನು ಕಲಿಯಿರಿ।",
+                malayalam: "ഉച്ചാരണവും അഭ്യാസവും കൊണ്ട് സാധാരണ പഴങ്ങളുടെയും പച്ചക്കറികളുടെയും പേരുകൾ പഠിക്കുക।",
+                punjabi: "ਉਚਾਰਨ ਅਤੇ ਅਭਿਆਸ ਨਾਲ ਆਮ ਫਲਾਂ ਅਤੇ ਸਬਜ਼ੀਆਂ ਦੇ ਨਾਮ ਸਿੱਖੋ।",
+                urdu: "تلفظ اور مشق کے ساتھ عام پھلوں اور سبزیوں کے نام سیکھیں۔",
+                assamese: "উচ্চাৰণ আৰু অভ্যাসৰ সৈতে সাধাৰণ ফল আৰু পাচলিৰ নাম শিকক।",
+                odia: "ଉଚ୍ଚାରଣ ଏବଂ ଅଭ୍ୟାସ ସହିତ ସାଧାରଣ ଫଳ ଏବଂ ପନିପରିବାର ନାମ ଶିଖନ୍ତୁ।",
+                nepali: "उच्चारण र अभ्यासको साथ सामान्य फलफूल र तरकारीका नामहरू सिक्नुहोस्।",
+                sindhi: "تلفظ ۽ مشق سان عام ميون ۽ ڀاڄين جا نالا سکو۔"
+            },
+            fruitsTab: {
+                english: "Fruits",
+                hindi: "फल",
+                bengali: "ফল",
+                tamil: "பழங்கள்",
+                telugu: "పండ్లు",
+                marathi: "फळे",
+                gujarati: "ફળો",
+                kannada: "ಹಣ್ಣುಗಳು",
+                malayalam: "പഴങ്ങൾ",
+                punjabi: "ਫਲ",
+                urdu: "پھل",
+                assamese: "ফল",
+                odia: "ଫଳ",
+                nepali: "फलफूल",
+                sindhi: "ميوا"
+            },
+            vegetablesTab: {
+                english: "Vegetables",
+                hindi: "सब्जियां",
+                bengali: "সবজি",
+                tamil: "காய்கறிகள்",
+                telugu: "కూరగాయలు",
+                marathi: "भाजी",
+                gujarati: "શાકભાજી",
+                kannada: "ತರಕಾರಿಗಳು",
+                malayalam: "പച്ചക്കറികൾ",
+                punjabi: "ਸਬਜ਼ੀਆਂ",
+                urdu: "سبزیاں",
+                assamese: "পাচলি",
+                odia: "ପନିପରିବା",
+                nepali: "तरकारी",
+                sindhi: "ڀاڄيون"
+            },
+            quizButton: {
+                english: "Take Quiz",
+                hindi: "क्विज़ लें",
+                bengali: "কুইজ নিন",
+                tamil: "வினாடி வினா எடுங்கள்",
+                telugu: "క్విజ్ తీసుకోండి",
+                marathi: "क्विझ घ्या",
+                gujarati: "ક્વિઝ લો",
+                kannada: "ಪ್ರಶ್ನಾವಳಿ ತೆಗೆದುಕೊಳ್ಳಿ",
+                malayalam: "ക്വിസ് എടുക്കുക",
+                punjabi: "ਕੁਇਜ਼ ਲਓ",
+                urdu: "کوئز لیں",
+                assamese: "কুইজ ল'ব",
+                odia: "କୁଇଜ୍ ନିଅନ୍ତୁ",
+                nepali: "क्विज लिनुहोस्",
+                sindhi: "ڪوئز وٺو"
+            }
+        };
+
+        async function loadVocabulary() {
+            try {
+                const response = await fetch(`/api/level-vocabulary/intermediate_1?language=${currentLanguage}`);
+                if (response.ok) {
+                    vocabularyData = await response.json();
+                    displayVocabulary();
+                } else {
+                    throw new Error('Failed to load vocabulary');
+                }
+            } catch (error) {
+                console.error('Error loading vocabulary:', error);
+                document.getElementById('vocabularyGrid').innerHTML = 
+                    '<div class="error">Failed to load vocabulary. Please try again.</div>';
+            }
+        }
+
+        function displayVocabulary() {
+            const grid = document.getElementById('vocabularyGrid');
+            const categoryData = vocabularyData[currentCategory] || {};
+            
+            if (Object.keys(categoryData).length === 0) {
+                grid.innerHTML = '<div class="loading">No vocabulary available for this category.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const [key, data] of Object.entries(categoryData)) {
+                const englishName = data.english || key;
+                const translatedName = data.translated || data.english || key;
+                const pronunciation = data.pronunciation || '';
+                
+                // Image extension mappings
+                const vegetableExtensions = {
+                    'apple': 'jpeg', 'banana': 'jpg', 'bitter_gourd': 'jpg', 'bottle_gourd': 'jpeg',
+                    'brinjal': 'jpg', 'cabbage': 'jpg', 'capsicum': 'jpeg', 'cauliflower': 'jpeg',
+                    'cherry': 'jpeg', 'chili': 'jpg', 'chilli': 'jpg', 'grapes': 'jpeg',
+                    'kiwi': 'jpeg', 'lady_finger': 'jpg', 'lichi': 'jpeg', 'mango': 'jpg',
+                    'mushroom': 'jpeg', 'onion': 'jpeg', 'orange': 'jpeg', 'papaya': 'jpeg',
+                    'pear': 'jpeg', 'peas': 'jpeg', 'pineapple': 'jpeg', 'pomegranate': 'jpeg',
+                    'potato': 'jpg', 'pumpkin': 'jpeg', 'spinach': 'jpg', 'strawberry': 'jpeg',
+                    'sugarcane': 'jpeg', 'tomato': 'jpeg', 'watermelon': 'jpeg'
+                };
+                
+                // Get correct extension
+                const extension = vegetableExtensions[key] || 'jpg';
+                const imagePath = `/static/images/${currentCategory}/${key}.${extension}`;
+                
+                html += `
+                    <div class="vocab-card" onclick="playAudio('${translatedName}')">
+                        <button class="play-audio-btn" onclick="event.stopPropagation(); playAudio('${translatedName}')">🔊</button>
+                        <img src="${imagePath}" alt="${englishName}" class="vocab-image" 
+                             onerror="this.src='/static/images/placeholder.jpg'">
+                        <div class="vocab-name-english">${englishName}</div>
+                        <div class="vocab-name-translated">${translatedName}</div>
+                        ${pronunciation ? `<div class="vocab-pronunciation">${pronunciation}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+            updateProgress();
+        }
+
+        function showCategory(category) {
+            currentCategory = category;
+            
+            // Update tab styles
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(category + 'Tab').classList.add('active');
+            
+            // Load and display vocabulary for selected category
+            displayVocabulary();
+        }
+
+        async function changeLanguage() {
+            const selectedLanguage = document.getElementById('languageSelect').value;
+            currentLanguage = selectedLanguage;
+            
+            // Show loading
+            document.getElementById('vocabularyGrid').innerHTML = '<div class="loading">Translating...</div>';
+            
+            // Update UI text
+            updateUIText();
+            
+            // Load vocabulary in new language
+            await loadVocabulary();
+            
+            // Store language preference
+            localStorage.setItem('preferredLanguage', selectedLanguage);
+            
+            // Save to server
+            try {
+                await fetch('/api/user-language', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ language: selectedLanguage })
+                });
+            } catch (error) {
+                console.warn('Failed to save language preference:', error);
+            }
+        }
+
+        function updateUIText() {
+            document.getElementById('pageTitle').textContent = uiTranslations.pageTitle[currentLanguage];
+            document.getElementById('pageDescription').textContent = uiTranslations.pageDescription[currentLanguage];
+            document.getElementById('fruitsTab').textContent = uiTranslations.fruitsTab[currentLanguage];
+            document.getElementById('vegetablesTab').textContent = uiTranslations.vegetablesTab[currentLanguage];
+            document.getElementById('quizButton').textContent = uiTranslations.quizButton[currentLanguage];
+        }
+
+        function updateProgress() {
+            const totalItems = Object.keys(vocabularyData.fruits || {}).length + 
+                             Object.keys(vocabularyData.vegetables || {}).length;
+            const currentItems = Object.keys(vocabularyData[currentCategory] || {}).length;
+            const progress = totalItems > 0 ? (currentItems / totalItems) * 100 : 0;
+            
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        async function playAudio(text) {
+            try {
+                // Use browser's speech synthesis for pronunciation
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    // Try to set appropriate language
+                    const langMap = {
+                        'hindi': 'hi-IN',
+                        'bengali': 'bn-IN',
+                        'tamil': 'ta-IN',
+                        'telugu': 'te-IN',
+                        'marathi': 'mr-IN',
+                        'gujarati': 'gu-IN',
+                        'kannada': 'kn-IN',
+                        'malayalam': 'ml-IN',
+                        'punjabi': 'pa-IN',
+                        'urdu': 'ur-PK',
+                        'english': 'en-US'
+                    };
+                    
+                    utterance.lang = langMap[currentLanguage] || 'en-US';
+                    utterance.rate = 0.8;
+                    
+                    speechSynthesis.speak(utterance);
+                }
+            } catch (error) {
+                console.warn('Audio playback failed:', error);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load saved language preference
+            const savedLanguage = localStorage.getItem('preferredLanguage');
+            if (savedLanguage) {
+                document.getElementById('languageSelect').value = savedLanguage;
+                currentLanguage = savedLanguage;
+                updateUIText();
+            }
+            
+            // Load initial vocabulary
+            await loadVocabulary();
+        });
+    </script>
+</body>
+</html>

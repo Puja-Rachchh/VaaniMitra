@@ -249,13 +249,9 @@
             </div>
         </div>
 
-        <h2 style="margin-top:40px;color:#27ae60;text-align:left;">Vegetables</h2>
-        <div class="fruits-grid" id="vegetablesGrid">
-            <!-- Vegetables will be added dynamically via JavaScript -->
-        </div>
-        <h2 style="margin-top:40px;color:#6c5ce7;text-align:left;">Fruits</h2>
-        <div class="fruits-grid" id="fruitsGrid">
-            <!-- Fruits will be added dynamically via JavaScript -->
+        <h2 style="margin-top:40px;color:#27ae60;text-align:left;">{{ category.title() }}</h2>
+        <div class="fruits-grid" id="vocabularyGrid">
+            <!-- Vocabulary will be added dynamically via JavaScript -->
         </div>
         <a href="/intermediate/1/quiz" class="quiz-button" style="display: none;">Take Quiz</a>
         <div class="navigation">
@@ -265,164 +261,59 @@
     </div>
 
     <script>
-        const fruits = [
-            { 
-                name: 'सेब',
-                nameEnglish: 'Apple',
-                image: '/static/images/fruits/apple.jpeg'
-            },
-            { 
-                name: 'केला',
-                nameEnglish: 'Banana',
-                image: '/static/images/fruits/banana.jpg'
-            },
-            { 
-                name: 'संतरा',
-                nameEnglish: 'Orange',
-                image: '/static/images/fruits/orange.jpeg'
-            },
-            { 
-                name: 'आम',
-                nameEnglish: 'Mango',
-                image: '/static/images/fruits/mango.jpg'
-            },
-            { 
-                name: 'अंगूर',
-                nameEnglish: 'Grapes',
-                image: '/static/images/fruits/grapes.jpeg'
-            },
-            { 
-                name: 'पपीता',
-                nameEnglish: 'Papaya',
-                image: '/static/images/fruits/papaya.jpeg'
-            },
-            { 
-                name: 'अनार',
-                nameEnglish: 'Pomegranate',
-                image: '/static/images/fruits/pomegranate.jpeg'
-            },
-            { 
-                name: 'नाशपाती',
-                nameEnglish: 'Pear',
-                image: '/static/images/fruits/pear.jpeg'
-            },
-            { 
-                name: 'स्ट्रॉबेरी',
-                nameEnglish: 'Strawberry',
-                image: '/static/images/fruits/strawberry.jpeg'
-            },
-            { 
-                name: 'कीवी',
-                nameEnglish: 'Kiwi',
-                image: '/static/images/fruits/kiwi.jpeg'
-            },
-            { 
-                name: 'अनन्नास',
-                nameEnglish: 'Pineapple',
-                image: '/static/images/fruits/pineapple.jpeg'
-            },
-            { 
-                name: 'चेरी',
-                nameEnglish: 'Cherry',
-                image: '/static/images/fruits/cherry.jpeg'
-            },
-            { 
-                name: 'तरबूज',
-                nameEnglish: 'Watermelon',
-                image: '/static/images/fruits/watermelon.jpeg'
-            },
-            {
-                name: 'गन्ना',
-                nameEnglish: 'Sugarcane',
-                image: '/static/images/fruits/sugarcane.jpeg'
-            },
-            {
-                name: 'लीची',
-                nameEnglish: 'Lychee',
-                image: '/static/images/fruits/lichi.jpeg'
-            },
-        ];
-
-        const vegetables = [
-            {
-                name: 'आलू',
-                nameEnglish: 'Potato',
-                image: '/static/images/fruits/potato.jpg'
-            },
-            { 
-                name: 'करेला',
-                nameEnglish: 'Bitter Gourd',
-                image: '/static/images/fruits/bitter_gourd.jpg'
-            },
-            {
-                name: 'टमाटर',
-                nameEnglish: 'Tomato',
-                image: '/static/images/fruits/tomato.jpeg'
-            },
-            {
-                name: 'लौकी',
-                nameEnglish: 'Bottle Gourd',
-                image: '/static/images/fruits/bottle_gourd.jpeg'
-            },
-            {
-                name: 'बैंगन',
-                nameEnglish: 'Brinjal',
-                image: '/static/images/fruits/brinjal.jpg'
-            },
-            {
-                name: 'पत्ता गोभी',
-                nameEnglish: 'Cabbage',
-                image: '/static/images/fruits/cabbage.jpg'
-            },
-            {
-                name: 'शिमला मिर्च',
-                nameEnglish: 'Capcicum',
-                image: '/static/images/fruits/capcicum.jpeg'
-            },
-            {
-                name: 'फूलगोभी',
-                nameEnglish: 'Cauliflower',
-                image: '/static/images/fruits/cauliflower.jpeg'
-            },
-            {
-                name: 'भिंडी',
-                nameEnglish: 'Lady Finger',
-                image: '/static/images/fruits/lady_finger.jpg'
-            },
-            {
-                name: 'मशरूम',
-                nameEnglish: 'Mushroom',
-                image: '/static/images/fruits/mushroom.jpeg'
-            },
-            {
-                name: 'प्याज',
-                nameEnglish: 'Onion',
-                image: '/static/images/fruits/onion.jpeg'
-            },
-            {
-                name: 'मटर',
-                nameEnglish: 'Peas',
-                image: '/static/images/fruits/peas.jpeg'
-            },
-            {
-                name: 'मिर्च',
-                nameEnglish: 'Chilli',
-                image: '/static/images/fruits/chilli.jpg'
-            },
-            {
-                name: 'कद्दू',
-                nameEnglish: 'Pumpkin',
-                image: '/static/images/fruits/pumpkin.jpeg'
-            },
-            {
-                name: 'पालक',
-                nameEnglish: 'Spinach',
-                image: '/static/images/fruits/spinach.jpg'
-            }
-        ];  
-
+        // Use server-side vocabulary data instead of hard-coded arrays
+        const vocabulary = {{ vocabulary|tojson }};
+        const category = "{{ category }}";
+        const targetLanguage = "{{ target_language }}";
+        
+        // Convert vocabulary to the format expected by the existing code
+        // Image extension mapping for fruits/vegetables
+        const imageExtensions = {
+            'apple': 'jpeg',
+            'banana': 'jpg',
+            'bitter_gourd': 'jpg',
+            'bottle_gourd': 'jpeg',
+            'brinjal': 'jpg',
+            'cabbage': 'jpg',
+            'capsicum': 'jpeg',
+            'cauliflower': 'jpeg',
+            'cherry': 'jpeg',
+            'chili': 'jpg',
+            'chilli': 'jpg',
+            'grapes': 'jpeg',
+            'kiwi': 'jpeg',
+            'lady_finger': 'jpg',
+            'lichi': 'jpeg',
+            'mango': 'jpg',
+            'mushroom': 'jpeg',
+            'onion': 'jpeg',
+            'orange': 'jpeg',
+            'papaya': 'jpeg',
+            'pear': 'jpeg',
+            'peas': 'jpeg',
+            'pineapple': 'jpeg',
+            'pomegranate': 'jpeg',
+            'potato': 'jpg',
+            'pumpkin': 'jpeg',
+            'spinach': 'jpg',
+            'strawberry': 'jpeg',
+            'sugarcane': 'jpeg',
+            'tomato': 'jpeg',
+            'watermelon': 'jpeg'
+        };
+        
+        const vocabularyItems = vocabulary.map((item, index) => {
+            const imageName = item.english.toLowerCase().replace(' ', '_');
+            const extension = item.image_ext || 'jpg'; // Use server-provided extension
+            return {
+                name: item.translation,
+                nameEnglish: item.english.charAt(0).toUpperCase() + item.english.slice(1),
+                image: `/static/images/${category}/${imageName}.${extension}`
+            };
+        });
+        
         let learnedItems = new Set();
-        const totalItems = fruits.length + vegetables.length;
+        const totalItems = vocabularyItems.length;
 
         function updateProgress() {
             const progress = (learnedItems.size / totalItems) * 100;
@@ -446,65 +337,44 @@
                 progressCount.style.background = 'linear-gradient(135deg, #6c5ce7, #a1c4fd)';
                 progressCount.style.color = 'white';
             } else {
-                document.querySelector('.progress-text').textContent = 'Learn all fruits and vegetables to unlock the quiz!';
+                document.querySelector('.progress-text').textContent = `Learn all ${category} to unlock the quiz!`;
                 document.querySelector('.quiz-button').style.display = 'none';
             }
         }
 
-        function learnItem(index, type) {
-            const itemId = `${type}_${index}`;
+        function learnItem(index) {
+            const itemId = `${category}_${index}`;
             learnedItems.add(itemId);
             updateProgress();
             
             // Visual feedback
             const cards = document.querySelectorAll('.fruit-card');
-            const card = cards[type === 'vegetable' ? index : vegetables.length + index];
+            const card = cards[index];
             card.style.background = '#f0f8ff';
             card.style.border = '2px solid #6c5ce7';
         }
 
-        function createFruitCards() {
-            const grid = document.getElementById('fruitsGrid');
-            
-            fruits.forEach((fruit, index) => {
+        function createVocabularyCards() {
+            const grid = document.getElementById('vocabularyGrid');
+            vocabularyItems.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'fruit-card';
                 card.innerHTML = `
-                    <img src="${fruit.image}" alt="${fruit.nameEnglish}" class="fruit-image">
-                    <div class="fruit-name">${fruit.name}</div>
-                    <div class="fruit-name-english">${fruit.nameEnglish}</div>
-                `;
-                
-                card.addEventListener('click', () => {
-                    learnItem(index, 'fruit');
-                    playFruitSound(fruit.name);
-                });
-                
-                grid.appendChild(card);
-            });
-        }
-
-        function createVegetableCards() {
-            const grid = document.getElementById('vegetablesGrid');
-            vegetables.forEach((veg, index) => {
-                const card = document.createElement('div');
-                card.className = 'fruit-card';
-                card.innerHTML = `
-                    <img src="${veg.image}" alt="${veg.nameEnglish}" class="fruit-image">
-                    <div class="fruit-name">${veg.name}</div>
-                    <div class="fruit-name-english">${veg.nameEnglish}</div>
+                    <img src="${item.image}" alt="${item.nameEnglish}" class="fruit-image">
+                    <div class="fruit-name">${item.name}</div>
+                    <div class="fruit-name-english">${item.nameEnglish}</div>
                 `;
                 card.addEventListener('click', () => {
-                    learnItem(index, 'vegetable');
-                    playFruitSound(veg.name);
+                    learnItem(index);
+                    playFruitSound(item.name);
                 });
                 grid.appendChild(card);
             });
         }
 
-        async function playFruitSound(fruitName) {
+        async function playFruitSound(itemName) {
             try {
-                const response = await fetch(`/generate-audio?text=${encodeURIComponent(fruitName)}`);
+                const response = await fetch(`/generate-audio?text=${encodeURIComponent(itemName)}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const blob = await response.blob();
@@ -517,7 +387,7 @@
         }
 
         // Initialize the grid when the page loads
-        createVegetableCards();
+        createVocabularyCards();
         createFruitCards();
         updateProgress();
     </script>

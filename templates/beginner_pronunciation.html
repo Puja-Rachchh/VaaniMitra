@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pronunciation Practice - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .language-selector select {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #2c3e50;
+            cursor: pointer;
+            outline: none;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-display {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-text {
+            font-size: 3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .word-pronunciation {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .recording-indicator {
+            display: none;
+            color: #dc3545;
+            font-weight: bold;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            background: #667eea;
+            height: 20px;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        .word-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .word-counter {
+            font-size: 1.1em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="bengali">বাংলা</option>
+            <option value="tamil">தமிழ்</option>
+            <option value="telugu">తెలుగు</option>
+            <option value="marathi">मराठी</option>
+            <option value="gujarati">ગુજરાતી</option>
+            <option value="kannada">ಕನ್ನಡ</option>
+            <option value="malayalam">മലയാളം</option>
+            <option value="punjabi">ਪੰਜਾਬੀ</option>
+            <option value="urdu">اردو</option>
+            <option value="assamese">অসমীয়া</option>
+            <option value="odia">ଓଡ଼ିଆ</option>
+            <option value="nepali">नेपाली</option>
+            <option value="sindhi">سنڌي</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <h1 id="pageTitle">Pronunciation Practice</h1>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div class="score-display">
+            Score: <span id="score">0</span>/<span id="totalWords">0</span>
+        </div>
+
+        <div class="word-display">
+            <div class="word-text" id="currentWord">—</div>
+            <div class="word-pronunciation" id="pronunciation">Listening practice for letters</div>
+        </div>
+
+        <div class="recording-indicator" id="recordingIndicator">
+            🎤 Listening... Speak now!
+        </div>
+
+        <div id="heardText" style="display:none; margin:6px 0; color:#444; font-size:0.95em;">
+            Heard: —
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="listenBtn" onclick="playWord()">
+                🔊 Listen
+            </button>
+            <button class="btn btn-success" id="recordBtn" onclick="startRecording()">
+                🎤 Record
+            </button>
+            <button class="btn btn-secondary" id="nextBtn" onclick="nextWord()" style="display: none;">
+                Next Word
+            </button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="word-navigation">
+            <button class="btn btn-secondary" onclick="previousWord()">← Previous</button>
+            <div class="word-counter">
+                Word <span id="currentWordIndex">1</span> of <span id="totalWordCount">10</span>
+            </div>
+            <button id="navNextBtn" class="btn btn-secondary" onclick="nextWord()" disabled>Next →</button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('beginner_choice') }}" class="btn btn-secondary">← Back to Beginner Menu</a>
+        </div>
+    </div>
+
+    <script>
+        // Letter data (re-using variable name 'vocabulary') and language passed from Flask
+        const vocabulary = {{ vocabulary|tojson }};
+        const targetLanguage = "{{ target_language }}";
+
+        let currentWordIndex = 0;
+        let score = 0;
+    let recognition = null;
+    let isRecording = false;
+    let canAdvance = false;
+    let lastTranscript = '';
+    let didEvaluate = false;
+    let gotAnyResult = false;
+    let micReady = false;
+
+        // Map app language -> Web Speech recognition locale
+        const recognitionLangMap = {
+            'hindi': 'hi-IN',
+            'gujarati': 'gu-IN',
+            'tamil': 'ta-IN',
+            'bengali': 'bn-IN',
+            'telugu': 'te-IN',
+            'marathi': 'mr-IN',
+            'punjabi': 'pa-IN',
+            'urdu': 'ur-PK',
+            'kannada': 'kn-IN',
+            'malayalam': 'ml-IN',
+            'assamese': 'as-IN',
+            'odia': 'or-IN',
+            'nepali': 'ne-NP',
+            'sindhi': 'sd-IN',
+            'english': 'en-US'
+        };
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true; // capture partials for fallback
+                // Use English recognition so learners can speak romanized letter names (aa, ee, ka, etc.)
+                // This avoids script/transliteration issues across browsers.
+                recognition.lang = 'en-US';
+
+                let hadError = false;
+
+                recognition.onstart = function() {
+                    isRecording = true;
+                    document.getElementById('recordingIndicator').style.display = 'block';
+                    document.getElementById('recordBtn').textContent = '⏹️ Stop Recording';
+                    lastTranscript = '';
+                    didEvaluate = false;
+                    hadError = false;
+                    gotAnyResult = false;
+                    const heardEl = document.getElementById('heardText');
+                    if (heardEl) { heardEl.style.display = 'block'; heardEl.textContent = 'Heard: —'; }
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    document.getElementById('recordingIndicator').style.display = 'none';
+                    document.getElementById('recordBtn').textContent = '🎤 Record';
+                    const heardEl = document.getElementById('heardText');
+                    if (heardEl && heardEl.style.display !== 'none') {
+                        heardEl.textContent = `Heard: ${lastTranscript || '—'}`;
+                    }
+                    // Fallback: if we have any transcript but no eval yet, evaluate now
+                    if (!didEvaluate && lastTranscript) {
+                        evaluatePronunciation(lastTranscript);
+                    } else if (!didEvaluate && !hadError && !gotAnyResult) {
+                        // If there was an error, onerror already showed feedback
+                        showFeedback('We could not hear you. Please try again closer to the mic.', 'incorrect');
+                    }
+                };
+
+                recognition.onresult = function(event) {
+                    // Aggregate interim and final results for fallback
+                    let aggregateAll = '';
+                    let aggregateFinal = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const chunk = event.results[i][0].transcript || '';
+                        aggregateAll += chunk + ' ';
+                        if (event.results[i].isFinal) {
+                            aggregateFinal += chunk + ' ';
+                        }
+                    }
+                    const allText = (aggregateAll || '').toLowerCase().trim();
+                    const finalText = (aggregateFinal || '').toLowerCase().trim();
+                    if (allText) { lastTranscript = allText; gotAnyResult = true; }
+                    const heardEl = document.getElementById('heardText');
+                    if (heardEl) heardEl.textContent = `Heard: ${finalText || allText || '—'}`;
+                    // Only evaluate once, prefer final results
+                    if (!didEvaluate && finalText) {
+                        evaluatePronunciation(finalText);
+                        didEvaluate = true;
+                    }
+                };
+
+                // Auto-stop when user stops speaking to trigger onend cleanly
+                recognition.onspeechend = function() {
+                    try { recognition.stop(); } catch (e) {}
+                };
+
+                recognition.onnomatch = function() {
+                    showFeedback('Did not catch that. Please try again.', 'incorrect');
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    hadError = true;
+                    if (event.error === 'no-speech') {
+                        showFeedback('No speech detected. Please try again.', 'incorrect');
+                    } else if (event.error === 'audio-capture') {
+                        showFeedback('Microphone not available. Check permissions.', 'incorrect');
+                    } else if (event.error === 'not-allowed') {
+                        showFeedback('Permission denied for microphone. Allow mic and retry.', 'incorrect');
+                    } else {
+                        showFeedback('Error occurred during speech recognition. Please try again.', 'incorrect');
+                    }
+                };
+            } else {
+                showFeedback('Speech recognition is not supported in your browser.', 'incorrect');
+            }
+        }
+
+        // Ask for mic permission explicitly before starting recognition
+        async function ensureMicPermission() {
+            if (micReady) return true;
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    // Fallback: let recognition attempt handle errors
+                    micReady = true; // allow flow to continue
+                    return true;
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Immediately stop tracks; we only needed the permission
+                stream.getTracks().forEach(t => t.stop());
+                micReady = true;
+                return true;
+            } catch (e) {
+                console.warn('Mic permission denied or unavailable:', e);
+                micReady = false;
+                showFeedback('Microphone permission is required. Please allow access and try again.', 'incorrect');
+                return false;
+            }
+        }
+
+        // Play the current letter using server-side TTS for better language coverage
+        async function playWord() {
+            try {
+                const item = vocabulary[currentWordIndex] || {};
+                const letter = item.english || '';
+                const speakText = letter; // speak the actual letter glyph in the target language
+                if (!letter) {
+                    showFeedback('No letter to play.', 'incorrect');
+                    return;
+                }
+                const res = await fetch('/play_letter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ letter: speakText, language: targetLanguage })
+                });
+                if (!res.ok) {
+                    showFeedback('Unable to generate audio. Please try again.', 'incorrect');
+                    return;
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play().catch(() => {
+                    showFeedback('Autoplay blocked. Tap the Listen button again.', 'incorrect');
+                });
+                audio.onended = () => URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Audio error:', e);
+                showFeedback('Audio playback error.', 'incorrect');
+            }
+        }
+
+        // Start recording pronunciation
+        async function startRecording() {
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+
+            if (!recognition) {
+                showFeedback('Speech recognition not initialized.', 'incorrect');
+                return;
+            }
+
+            if (isRecording) {
+                try { recognition.stop(); } catch (e) {}
+                return;
+            }
+
+            const ok = await ensureMicPermission();
+            if (!ok) return;
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Failed to start recognition:', e);
+                showFeedback('Could not start microphone. Please try again.', 'incorrect');
+            }
+        }
+
+        // Normalize text for comparison
+        function normalizeText(s) {
+            return (s || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // strip diacritics
+                .replace(/[^a-z0-9]/g, '') // keep letters/numbers only
+                .replace(/aa+/g, 'aa') // collapse long vowels
+                .replace(/ii+/g, 'ii')
+                .replace(/uu+/g, 'uu');
+        }
+
+        // Evaluate pronunciation against romanization/transliteration variants
+        function setAdvanceAllowed(allowed) {
+            canAdvance = !!allowed;
+            const nextBtn = document.getElementById('nextBtn');
+            const navNextBtn = document.getElementById('navNextBtn');
+            if (nextBtn) nextBtn.style.display = allowed ? 'inline-block' : 'none';
+            if (navNextBtn) navNextBtn.disabled = !allowed;
+        }
+
+        function evaluatePronunciation(transcript) {
+            const item = vocabulary[currentWordIndex] || {};
+            const variants = new Set();
+            if (item.pronunciation) variants.add(item.pronunciation);
+            if (item.transliteration) variants.add(item.transliteration);
+
+            // Some basic fallback variants for common vowels
+            const fallbackMap = {
+                'a': ['uh', 'ah'],
+                'aa': ['a', 'aah', 'ah'],
+                'i': ['ee', 'ih'],
+                'ii': ['ee', 'eelong'],
+                'u': ['oo', 'uh'],
+                'uu': ['oo', 'oolong'],
+                'e': ['ay'],
+                'ai': ['eye', 'ay'],
+                'o': ['oh'],
+                'au': ['ow']
+            };
+
+            const basePron = (item.pronunciation || '').toLowerCase();
+            if (fallbackMap[basePron]) fallbackMap[basePron].forEach(v => variants.add(v));
+
+            const normalizedTranscript = normalizeText(transcript);
+            let matched = false;
+            let bestVariant = '';
+            for (const v of variants) {
+                const n = normalizeText(v);
+                if (!n) continue;
+                if (normalizedTranscript.includes(n)) {
+                    matched = true; bestVariant = v; break;
+                }
+                const dist = levenshteinDistance(normalizedTranscript, n);
+                const threshold = n.length <= 2 ? 1 : 2;
+                if (dist <= threshold) { matched = true; bestVariant = v; break; }
+            }
+
+            if (matched) {
+                score++;
+                showFeedback(`Great! Recognized as "${bestVariant || transcript}"`, 'correct');
+                setAdvanceAllowed(true);
+            } else {
+                showFeedback(`Not quite. Heard "${transcript}". Try again or tap Listen.`, 'incorrect');
+                setAdvanceAllowed(false);
+            }
+
+            updateScore();
+        }
+
+        // Calculate Levenshtein distance for fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        // Show feedback to user
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update score display
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('totalWords').textContent = vocabulary.length;
+            const totalCountEl = document.getElementById('totalWordCount');
+            if (totalCountEl) totalCountEl.textContent = vocabulary.length;
+            const progress = ((currentWordIndex + 1) / vocabulary.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Navigate to next word
+        function nextWord() {
+            if (!canAdvance) {
+                showFeedback('Please pronounce the current letter correctly before proceeding.', 'incorrect');
+                return;
+            }
+            if (currentWordIndex < vocabulary.length - 1) {
+                currentWordIndex++;
+                updateWordDisplay();
+                setAdvanceAllowed(false);
+                document.getElementById('feedback').style.display = 'none';
+            } else {
+                showCompletionMessage();
+            }
+        }
+
+        // Navigate to previous word
+        function previousWord() {
+            if (currentWordIndex > 0) {
+                currentWordIndex--;
+                updateWordDisplay();
+                setAdvanceAllowed(false);
+                document.getElementById('feedback').style.display = 'none';
+            }
+        }
+
+        // Update word display
+        function updateWordDisplay() {
+            const word = vocabulary[currentWordIndex] || {};
+            document.getElementById('currentWord').textContent = word.english || '—';
+            const pron = word.pronunciation || '';
+            const translit = word.transliteration ? ` • ${word.transliteration}` : '';
+            document.getElementById('pronunciation').textContent = pron ? `/${pron}/${translit}` : '';
+            document.getElementById('currentWordIndex').textContent = currentWordIndex + 1;
+            updateScore();
+            setAdvanceAllowed(false);
+        }
+
+        // Show completion message
+        function showCompletionMessage() {
+            const percentage = Math.round((score / vocabulary.length) * 100);
+            let message = `Practice completed! Your score: ${score}/${vocabulary.length} (${percentage}%)`;
+
+            if (percentage >= 80) {
+                message += '\nExcellent pronunciation skills!';
+            } else if (percentage >= 60) {
+                message += '\nGood job! Keep practicing.';
+            } else {
+                message += '\nKeep practicing to improve your pronunciation.';
+            }
+
+            alert(message);
+
+            // Reset for another round
+            currentWordIndex = 0;
+            score = 0;
+            updateWordDisplay();
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        // Language change functionality (similar to other pages)
+        function changeLanguage() {
+            const selectedLanguage = document.getElementById('languageSelect').value;
+            localStorage.setItem('preferredLanguage', selectedLanguage);
+            // Note: In a full implementation, you might want to reload the page with new language data
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initSpeechRecognition();
+            updateWordDisplay();
+
+            // Load saved language preference
+            const savedLanguage = localStorage.getItem('preferredLanguage');
+            if (savedLanguage) {
+                document.getElementById('languageSelect').value = savedLanguage;
+            }
+        });
+    </script>
+</body>
+</html>

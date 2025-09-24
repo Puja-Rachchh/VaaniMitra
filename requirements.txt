@@ -6,3 +6,8 @@ pygame
 pymongo
 flask-pymongo
 python-dotenv
+transformers
+torch
+sentencepiece
+accelerate
+protobuf

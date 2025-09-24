@@ -257,8 +257,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>Level 2: Learn Animals and Birds in Hindi</h1>
+        <h1>Level 2: Learn Animals and Birds in {{ target_language.title() }}</h1>
         <div class="subtitle">Learn all animals and birds, then take the quiz!</div>
+        
+        <!-- Debug info -->
+        <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
+            <strong>Debug Info:</strong><br>
+            Category: {{ category }}<br>
+            Target Language: {{ target_language }}<br>
+            Vocabulary Items: {{ vocabulary|length }}<br>
+            Sample: 
+            {% for item in vocabulary[:3] %}
+                {{ item.english }} -> {{ item.translation }}<br>
+            {% endfor %}
+        </div>
         
         <div class="progress-container">
             <div class="progress-text">Learn all animals and birds to unlock the quiz!</div>
@@ -272,220 +284,23 @@
         </div>
 
         <h2 style="margin-top:40px;color:#27ae60;text-align:left;font-size:1.8em;">Animals</h2>
+        
+        <!-- Show vocabulary data for debugging -->
+        <div style="background: #e8f5e8; padding: 10px; margin: 10px 0; border: 1px solid #4caf50;">
+            <strong>Vocabulary Data ({{ vocabulary|length }} items):</strong>
+            <ul>
+            {% for item in vocabulary %}
+                <li>{{ item.english }} -> {{ item.translation }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        
         <div class="animal-grid" id="animalGrid">
-            <div class="animal-card" onclick="learnAnimal('कुत्ता', this)">
-                <img src="/static/images/animals/dog.jpg" alt="Dog" class="animal-image">
-                <div class="animal-name">Dog</div>
-                <div class="animal-hindi">कुत्ता</div>
-                <div class="animal-pronunciation">(Kutta)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बिल्ली', this)">
-                <img src="/static/images/animals/cat.jpg" alt="Cat" class="animal-image">
-                <div class="animal-name">Cat</div>
-                <div class="animal-hindi">बिल्ली</div>
-                <div class="animal-pronunciation">(Billi)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('गाय', this)">
-                <img src="/static/images/animals/cow.jpg" alt="Cow" class="animal-image">
-                <div class="animal-name">Cow</div>
-                <div class="animal-hindi">गाय</div>
-                <div class="animal-pronunciation">(Gaay)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('घोड़ा', this)">
-                <img src="/static/images/animals/horse.jpg" alt="Horse" class="animal-image">
-                <div class="animal-name">Horse</div>
-                <div class="animal-hindi">घोड़ा</div>
-                <div class="animal-pronunciation">(Ghoda)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बकरी', this)">
-                <img src="/static/images/animals/goat.jpeg" alt="Goat" class="animal-image">
-                <div class="animal-name">Goat</div>
-                <div class="animal-hindi">बकरी</div>
-                <div class="animal-pronunciation">(Bakri)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('शेर', this)">
-                <img src="/static/images/animals/lion.jpg" alt="Lion" class="animal-image">
-                <div class="animal-name">Lion</div>
-                <div class="animal-hindi">शेर</div>
-                <div class="animal-pronunciation">(Sher)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('हाथी', this)">
-                <img src="/static/images/animals/elephant.jpg" alt="Elephant" class="animal-image">
-                <div class="animal-name">Elephant</div>
-                <div class="animal-hindi">हाथी</div>
-                <div class="animal-pronunciation">(Haathi)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('भालू', this)">
-                <img src="/static/images/animals/bear.jpg" alt="Bear" class="animal-image">
-                <div class="animal-name">Bear</div>
-                <div class="animal-hindi">भालू</div>
-                <div class="animal-pronunciation">(Bhaalu)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बंदर', this)">
-                <img src="/static/images/animals/monkey.jpg" alt="Monkey" class="animal-image">
-                <div class="animal-name">Monkey</div>
-                <div class="animal-hindi">बंदर</div>
-                <div class="animal-pronunciation">(Bandar)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('लोमड़ी', this)">
-                <img src="/static/images/animals/fox.jpg" alt="Fox" class="animal-image">
-                <div class="animal-name">Fox</div>
-                <div class="animal-hindi">लोमड़ी</div>
-                <div class="animal-pronunciation">(Lomdi)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('भेड़', this)">
-                <img src="/static/images/animals/sheep.jpg" alt="Sheep" class="animal-image">
-                <div class="animal-name">Sheep</div>
-                <div class="animal-hindi">भेड़</div>
-                <div class="animal-pronunciation">(Bhed)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('ऊंट', this)">
-                <img src="/static/images/animals/camel.jpeg" alt="Camel" class="animal-image">
-                <div class="animal-name">Camel</div>
-                <div class="animal-hindi">ऊंट</div>
-                <div class="animal-pronunciation">(Oont)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('चूहा', this)">
-                <img src="/static/images/animals/mouse.jpg" alt="Mouse" class="animal-image">
-                <div class="animal-name">Mouse</div>
-                <div class="animal-hindi">चूहा</div>
-                <div class="animal-pronunciation">(Chuha)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('साँप', this)">
-                <img src="/static/images/animals/snake.jpg" alt="Snake" class="animal-image">
-                <div class="animal-name">Snake</div>
-                <div class="animal-hindi">साँप</div>
-                <div class="animal-pronunciation">(Saanp)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('मछली', this)">
-                <img src="/static/images/animals/fish.jpeg" alt="Fish" class="animal-image">
-                <div class="animal-name">Fish</div>
-                <div class="animal-hindi">मछली</div>
-                <div class="animal-pronunciation">(Machhli)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('कछुआ', this)">
-                <img src="/static/images/animals/turtle.jpg" alt="Turtle" class="animal-image">
-                <div class="animal-name">Turtle</div>
-                <div class="animal-hindi">कछुआ</div>
-                <div class="animal-pronunciation">(Kachua)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('गधा', this)">
-                <img src="/static/images/animals/donkey.jpg" alt="Donkey" class="animal-image">
-                <div class="animal-name">Donkey</div>
-                <div class="animal-hindi">गधा</div>
-                <div class="animal-pronunciation">(Gadha)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('खरगोश', this)">
-                <img src="/static/images/animals/rabbit.jpg" alt="Rabbit" class="animal-image">
-                <div class="animal-name">Rabbit</div>
-                <div class="animal-hindi">खरगोश</div>
-                <div class="animal-pronunciation">(Khargosh)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बाघ', this)">
-                <img src="/static/images/animals/tiger.jpg" alt="Tiger" class="animal-image">
-                <div class="animal-name">Tiger</div>
-                <div class="animal-hindi">बाघ</div>
-                <div class="animal-pronunciation">(Baagh)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('गैंडा', this)">
-                <img src="/static/images/animals/rhino.jpeg" alt="Rhinoceros" class="animal-image">
-                <div class="animal-name">Rhinoceros</div>
-                <div class="animal-hindi">गैंडा</div>
-                <div class="animal-pronunciation">(Gainda)</div>
-            </div>
+            <!-- Animal cards will be generated dynamically -->
         </div>
         <h2 style="margin-top:40px;color:#6c5ce7;text-align:left;">Birds</h2>
         <div class="animal-grid" id="birdGrid">
-            <div class="animal-card" onclick="learnAnimal('तोता', this)">
-                <img src="/static/images/animals/parrot.jpg" alt="Parrot" class="animal-image">
-                <div class="animal-name">Parrot</div>
-                <div class="animal-hindi">तोता</div>
-                <div class="animal-pronunciation">(Tota)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('मोर', this)">
-                <img src="/static/images/animals/peacock.jpg" alt="Peacock" class="animal-image">
-                <div class="animal-name">Peacock</div>
-                <div class="animal-hindi">मोर</div>
-                <div class="animal-pronunciation">(Mor)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('कौआ', this)">
-                <img src="/static/images/animals/crow.jpeg" alt="Crow" class="animal-image">
-                <div class="animal-name">Crow</div>
-                <div class="animal-hindi">कौआ</div>
-                <div class="animal-pronunciation">(Kaua)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('गौरैया', this)">
-                <img src="/static/images/animals/sparrow.jpeg" alt="Sparrow" class="animal-image">
-                <div class="animal-name">Sparrow</div>
-                <div class="animal-hindi">गौरैया</div>
-                <div class="animal-pronunciation">(Gauraiya)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('कबूतर', this)">
-                <img src="/static/images/animals/pigeon.jpg" alt="Pigeon" class="animal-image">
-                <div class="animal-name">Pigeon</div>
-                <div class="animal-hindi">कबूतर</div>
-                <div class="animal-pronunciation">(Kabutar)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बत्तख', this)">
-                <img src="/static/images/animals/duck.jpg" alt="Duck" class="animal-image">
-                <div class="animal-name">Duck</div>
-                <div class="animal-hindi">बत्तख</div>
-                <div class="animal-pronunciation">(Battakh)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('मुर्गी', this)">
-                <img src="/static/images/animals/hen.jpg" alt="Hen" class="animal-image">
-                <div class="animal-name">Hen</div>
-                <div class="animal-hindi">मुर्गी</div>
-                <div class="animal-pronunciation">(Murgi)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('उल्लू', this)">
-                <img src="/static/images/animals/owl.jpg" alt="Owl" class="animal-image">
-                <div class="animal-name">Owl</div>
-                <div class="animal-hindi">उल्लू</div>
-                <div class="animal-pronunciation">(Ullu)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('बाज', this)">
-                <img src="/static/images/animals/eagle.jpeg" alt="Eagle" class="animal-image">
-                <div class="animal-name">Eagle</div>
-                <div class="animal-hindi">बाज</div>
-                <div class="animal-pronunciation">(Baaz)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('तितली', this)">
-                <img src="/static/images/animals/butterfly.jpg" alt="Butterfly" class="animal-image">
-                <div class="animal-name">Butterfly</div>
-                <div class="animal-hindi">तितली</div>
-                <div class="animal-pronunciation">(Titli)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('कठफोड़वा', this)">
-                <img src="/static/images/animals/woodpecker.jpeg" alt="Woodpecker" class="animal-image">
-                <div class="animal-name">Woodpecker</div>
-                <div class="animal-hindi">कठफोड़वा</div>
-                <div class="animal-pronunciation">(Kathphodwa)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('राजमछी', this)">
-                <img src="/static/images/animals/kingfisher.jpg" alt="Kingfisher" class="animal-image">
-                <div class="animal-name">Kingfisher</div>
-                <div class="animal-hindi">राजमछी</div>
-                <div class="animal-pronunciation">(Rajmachhi)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('राजहंस', this)">
-                <img src="/static/images/animals/flamingo.jpg" alt="Flamingo" class="animal-image">
-                <div class="animal-name">Flamingo</div>
-                <div class="animal-hindi">राजहंस</div>
-                <div class="animal-pronunciation">(Rajhans)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('हंस', this)">
-                <img src="/static/images/animals/swan.JPG" alt="Swan" class="animal-image">
-                <div class="animal-name">Swan</div>
-                <div class="animal-hindi">हंस</div>
-                <div class="animal-pronunciation">(Hans)</div>
-            </div>
-            <div class="animal-card" onclick="learnAnimal('सारस', this)">   
-                <img src="/static/images/animals/crane.jpg" alt="Crane" class="animal-image">
-                <div class="animal-name">Crane</div>
-                <div class="animal-hindi">सारस</div>
-                <div class="animal-pronunciation">(Saras)</div>
-            </div>
+            <!-- Bird cards will be generated dynamically -->
         </div>
             <div style="text-align:center; margin-top:40px;">
         <a href="/intermediate/2/quiz" class="quiz-button" style="display: none;">Take Quiz</a>
@@ -497,8 +312,75 @@
     </div>
 
     <script>
+        // Use server-side vocabulary data instead of hard-coded arrays
+        const vocabulary = {{ vocabulary|tojson }};
+        const category = "{{ category }}";
+        const targetLanguage = "{{ target_language }}";
+        
+        console.log('Vocabulary data:', vocabulary);
+        console.log('Category:', category);
+        console.log('Target language:', targetLanguage);
+        
+        // Convert vocabulary to the format expected by the existing code
+        // Image extension mapping for animals
+        const imageExtensions = {
+            'bear': 'jpg',
+            'butterfly': 'jpg',
+            'camel': 'jpeg',
+            'cat': 'jpg',
+            'cow': 'jpg',
+            'crane': 'jpg',
+            'crow': 'jpeg',
+            'dog': 'jpg',
+            'donkey': 'jpg',
+            'duck': 'jpg',
+            'eagle': 'jpeg',
+            'elephant': 'jpg',
+            'fish': 'jpeg',
+            'flamingo': 'jpg',
+            'fox': 'jpg',
+            'goat': 'jpeg',
+            'hen': 'jpg',
+            'horse': 'jpg',
+            'kingfisher': 'jpg',
+            'lion': 'jpg',
+            'monkey': 'jpg',
+            'mouse': 'jpg',
+            'owl': 'jpg',
+            'parrot': 'jpg',
+            'peacock': 'jpg',
+            'pigeon': 'jpg',
+            'rabbit': 'jpg',
+            'rhino': 'jpeg',
+            'sheep': 'jpg',
+            'snake': 'jpg',
+            'sparrow': 'jpeg',
+            'squirrel': 'jpeg',
+            'swan': 'JPG',
+            'tiger': 'jpg',
+            'turtle': 'jpg',
+            'woodpecker': 'jpeg',
+            'chicken': 'jpg', // alias for hen
+            'deer': 'jpg',
+            'pig': 'jpg',
+            'ant': 'jpg',
+            'bee': 'jpg'
+        };
+        
+        const vocabularyItems = vocabulary.map((item, index) => {
+            const imageName = item.english.toLowerCase().replace(' ', '_');
+            const extension = imageExtensions[imageName] || 'jpg'; // fallback to jpg
+            return {
+                name: item.translation,
+                nameEnglish: item.english.charAt(0).toUpperCase() + item.english.slice(1),
+                image: `/static/images/animals/${imageName}.${extension}`
+            };
+        });
+        
+        console.log('Vocabulary items:', vocabularyItems);
+        
         let learnedAnimals = new Set();
-        const totalAnimals = 35;
+        const totalAnimals = vocabularyItems.length;
 
         function updateProgress() {
             const progress = (learnedAnimals.size / totalAnimals) * 100;
@@ -539,49 +421,47 @@
             playAudio(animalName);
         }
 
-        function playAudio(text) {
+        function playAudio(translationText, englishText) {
             // Create audio using Web Speech API or fetch from server
             try {
                 // Try to use browser's speech synthesis first
                 if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'hi-IN';
+                    const utterance = new SpeechSynthesisUtterance(englishText); // Use English for better TTS support
+                    utterance.lang = 'en-US'; // Use English voice
                     utterance.rate = 0.8;
                     speechSynthesis.speak(utterance);
                 } else {
                     // Fallback to server-generated audio
-                    const audio = new Audio(`/generate-audio?text=${encodeURIComponent(text)}`);
+                    const audio = new Audio(`/generate-audio?text=${encodeURIComponent(englishText)}`);
                     audio.play().catch(e => console.log('Audio playback failed:', e));
                 }
             } catch (error) {
                 console.log('Audio not available:', error);
                 // Visual feedback when audio isn't available
-                alert(`Pronunciation: ${text}`);
+                alert(`Pronunciation: ${englishText}`);
             }
         }
 
-        function playPronunciation(word) {
-            fetch('/play_hindi_letter', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ letter: word })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Audio fetch failed');
-                return response.blob();
-            })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const audio = new Audio(url);
-                audio.play();
-                audio.onended = () => URL.revokeObjectURL(url);
-            })
-            .catch(err => {
-                console.log('Could not play sound: ' + err.message);
+        function createVocabularyCards() {
+            const grid = document.getElementById('animalGrid');
+            vocabularyItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'animal-card';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.nameEnglish}" class="animal-image" onerror="this.style.display='none'">
+                    <div class="animal-name">${item.name}</div>
+                    <div class="animal-name-english">${item.nameEnglish}</div>
+                `;
+                card.addEventListener('click', () => {
+                    learnAnimal(item.name, card);
+                    playAudio(item.nameEnglish, item.name);
+                });
+                grid.appendChild(card);
             });
         }
 
-        // Initialize progress on page load
+        // Initialize
+        createVocabularyCards();
         updateProgress();
     </script>
 </body>

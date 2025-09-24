@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ target_language }} Letters - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-right: 220px; /* Space for sidepanel */
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .language-info {
+            text-align: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            color: #2c3e50;
+        }
+
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .letter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .letter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .letter {
+            font-size: 2.5em;
+            margin: 10px 0;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .letter-name {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .letter-romanization {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* Sidepanel styles */
+        .sidepanel {
+            height: 100vh;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            color: white;
+        }
+
+        .sidepanel h3 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .next-btn {
+            padding: 7px 18px;
+            font-size: 1rem;
+            background: #198754;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin: 30px 0 15px 0;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Learn {{ target_language }} Letters</h1>
+        
+        <div class="language-info">
+            <p><strong>Target Language:</strong> {{ target_language }}</p>
+            <p><strong>Your Known Language:</strong> {{ known_language }}</p>
+            <p>Click on any letter to hear its pronunciation</p>
+        </div>
+
+        {% if letters %}
+            {% if letters.vowels %}
+            <div class="section-title">Vowels (स्वर)</div>
+            <div class="letters-grid">
+                {% for letter_data in letters.vowels %}
+                <div class="letter-card" onclick="playLetter('{{ letter_data.letter }}', '{{ letter_data.name }}')">
+                    <div class="letter">{{ letter_data.letter }}</div>
+                    <div class="letter-name">{{ letter_data.name }}</div>
+                    
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if letters.consonants %}
+            <div class="section-title">Consonants (व्यंजन)</div>
+            <div class="letters-grid">
+                {% for letter_data in letters.consonants %}
+                <div class="letter-card" onclick="playLetter('{{ letter_data.letter }}', '{{ letter_data.name }}')">
+                    <div class="letter">{{ letter_data.letter }}</div>
+                    <div class="letter-name">{{ letter_data.name }}</div>
+                    {% if letter_data.romanization %}
+                    <div class="letter-romanization">{{ letter_data.romanization }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="language-info">
+                <p>Letters for {{ target_language }} are not available yet. Please contact support.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidepanel -->
+    <div class="sidepanel">
+        <h3>Progress</h3>
+        <p>Learning {{ target_language }} letters</p>
+        <div style="margin-top: 20px;">
+            <p>Letters learned: <span id="learnedCount">0</span></p>
+            <div style="background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px; margin: 10px 0;">
+                <div id="progressBar" style="height: 100%; background: #4CAF50; border-radius: 5px; width: 0%;"></div>
+            </div>
+        </div>
+        <button class="next-btn" id="nextBtn">Next Level</button>
+    </div>
+
+    <script>
+        let learnedLetters = new Set();
+        const totalLetters = {{ total_letters }};
+
+        function playLetter(letter, name) {
+            // Mark letter as learned
+            learnedLetters.add(letter);
+            updateProgress();
+            
+            // Show visual feedback immediately
+            console.log(`Attempting to play sound for: ${letter} (${name})`);
+            
+            // Visual feedback - briefly highlight the letter
+            if (event && event.target) {
+                event.target.style.backgroundColor = '#ffa500'; // Orange for attempting
+                setTimeout(() => {
+                    event.target.style.backgroundColor = 'white';
+                }, 500);
+            }
+            
+            // Try to play audio
+            console.log('Sending request to /play_letter...');
+            fetch('/play_letter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    letter: letter,
+                    language: '{{ target_language }}'
+                })
+            })
+            .then(response => {
+                console.log('Response received:', response.status, response.statusText);
+                if (response.ok) {
+                    // Visual feedback for success
+                    if (event && event.target) {
+                        event.target.style.backgroundColor = '#4CAF50'; // Green for success
+                        setTimeout(() => {
+                            event.target.style.backgroundColor = 'white';
+                        }, 300);
+                    }
+                    
+                    // Create blob from response and play audio
+                    return response.blob();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            })
+            .then(blob => {
+                console.log('Audio blob received, size:', blob.size, 'type:', blob.type);
+                if (blob.size === 0) {
+                    throw new Error('Received empty audio blob');
+                }
+                
+                const audioUrl = URL.createObjectURL(blob);
+                const audio = new Audio(audioUrl);
+                
+                // Set volume to maximum for testing
+                audio.volume = 1.0;
+                
+                console.log('Attempting to play audio...');
+                
+                // For debugging - let's also try a different approach
+                audio.preload = 'auto';
+                audio.load();
+                
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('✅ Audio played successfully');
+                        // Clean up the blob URL after playing
+                        audio.onended = () => {
+                            console.log('Audio playback ended, cleaning up');
+                            URL.revokeObjectURL(audioUrl);
+                        };
+                    }).catch(error => {
+                        console.error('❌ Audio playback failed:', error);
+                        console.log('Error details:', {
+                            name: error.name,
+                            message: error.message,
+                            code: error.code
+                        });
+                        
+                        // Try to provide more helpful error info
+                        if (error.name === 'NotAllowedError') {
+                            console.log('🔇 Browser blocked audio - try clicking to enable sound first');
+                            alert('Browser blocked audio. Please click "Allow" for audio permissions, then try again.');
+                        } else if (error.name === 'NotSupportedError') {
+                            console.log('🎵 Audio format not supported');
+                        }
+                        
+                        URL.revokeObjectURL(audioUrl);
+                        
+                        // Show red for audio failure
+                        if (event && event.target) {
+                            event.target.style.backgroundColor = '#ff6b6b';
+                            setTimeout(() => {
+                                event.target.style.backgroundColor = 'white';
+                            }, 300);
+                        }
+                    });
+                } else {
+                    console.error('❌ audio.play() returned undefined');
+                    URL.revokeObjectURL(audioUrl);
+                }
+            })
+            .catch(error => {
+                console.error('Error in audio request:', error);
+                // Fallback - show red for request failure
+                if (event && event.target) {
+                    event.target.style.backgroundColor = '#ff6b6b';
+                    setTimeout(() => {
+                        event.target.style.backgroundColor = 'white';
+                    }, 300);
+                }
+            });
+        }
+
+        function updateProgress() {
+            const learned = learnedLetters.size;
+            const percentage = (learned / totalLetters) * 100;
+            
+            document.getElementById('learnedCount').textContent = learned;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            
+            if (learned === totalLetters) {
+                document.getElementById('nextBtn').style.background = '#4CAF50';
+                document.getElementById('nextBtn').textContent = 'Complete! Next Level';
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (learnedLetters.size === totalLetters) {
+                // Redirect to next level
+                window.location.href = '/intermediate_levels';
+            } else {
+                alert('Please practice all letters before proceeding to the next level.');
+            }
+        });
+    </script>
+</body>
+</html>

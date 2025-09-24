@@ -260,8 +260,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Level 3: Colors in Hindi</h1>
-        <p class="subtitle">रंग (Rang) - Learn the beautiful colors in Hindi</p>
+        <h1>Level 3: Colors in {{ target_language.title() }}</h1>
+        <p class="subtitle">Learn the beautiful colors in {{ target_language.title() }}</p>
         
         <div class="progress-container">
             <div class="progress-text">Complete all colors to unlock the quiz!</div>
@@ -285,20 +285,53 @@
     </div>
 
     <script>
-        const colors = [
-            { english: 'Red', hindi: 'लाल', pronunciation: 'laal', class: 'red' },
-            { english: 'Blue', hindi: 'नीला', pronunciation: 'neela', class: 'blue' },
-            { english: 'Green', hindi: 'हरा', pronunciation: 'hara', class: 'green' },
-            { english: 'Yellow', hindi: 'पीला', pronunciation: 'peela', class: 'yellow' },
-            { english: 'Orange', hindi: 'नारंगी', pronunciation: 'narangi', class: 'orange' },
-            { english: 'Purple', hindi: 'बैंगनी', pronunciation: 'baingani', class: 'purple' },
-            { english: 'Pink', hindi: 'गुलाबी', pronunciation: 'gulaabi', class: 'pink' },
-            { english: 'Brown', hindi: 'भूरा', pronunciation: 'bhoora', class: 'brown' },
-            { english: 'Black', hindi: 'काला', pronunciation: 'kaala', class: 'black' },
-            { english: 'White', hindi: 'सफ़ेद', pronunciation: 'safed', class: 'white' },
-            { english: 'Gray', hindi: 'स्लेटी', pronunciation: 'sleti', class: 'gray' },
-            { english: 'Cyan', hindi: 'आसमानी', pronunciation: 'aasmani', class: 'cyan' }
-        ];
+        // Use server-side vocabulary data instead of hard-coded arrays
+        const vocabulary = {{ vocabulary|tojson }};
+        const category = "{{ category }}";
+        const targetLanguage = "{{ target_language }}";
+        
+        console.log('Vocabulary data:', vocabulary);
+        console.log('Category:', category);
+        console.log('Target language:', targetLanguage);
+        
+        // Color mapping for CSS classes and pronunciations
+        const colorMapping = {
+            'red': { class: 'red', pronunciation: 'red' },
+            'blue': { class: 'blue', pronunciation: 'blue' },
+            'green': { class: 'green', pronunciation: 'green' },
+            'yellow': { class: 'yellow', pronunciation: 'yellow' },
+            'orange': { class: 'orange', pronunciation: 'orange' },
+            'purple': { class: 'purple', pronunciation: 'purple' },
+            'pink': { class: 'pink', pronunciation: 'pink' },
+            'white': { class: 'white', pronunciation: 'white' },
+            'black': { class: 'black', pronunciation: 'black' },
+            'brown': { class: 'brown', pronunciation: 'brown' },
+            'gray': { class: 'gray', pronunciation: 'gray' },
+            'violet': { class: 'purple', pronunciation: 'violet' }, // Map violet to purple class
+            'indigo': { class: 'purple', pronunciation: 'indigo' }, // Map indigo to purple class
+            'cyan': { class: 'cyan', pronunciation: 'cyan' },
+            'magenta': { class: 'pink', pronunciation: 'magenta' }, // Map magenta to pink class
+            'maroon': { class: 'brown', pronunciation: 'maroon' }, // Map maroon to brown class
+            'navy': { class: 'blue', pronunciation: 'navy' }, // Map navy to blue class
+            'olive': { class: 'green', pronunciation: 'olive' }, // Map olive to green class
+            'silver': { class: 'gray', pronunciation: 'silver' }, // Map silver to gray class
+            'gold': { class: 'yellow', pronunciation: 'gold' } // Map gold to yellow class
+        };
+        
+        // Convert vocabulary to the format expected by the existing code
+        const colors = vocabulary.map((item, index) => {
+            const english = item.english.toLowerCase();
+            const mapping = colorMapping[english] || { class: 'gray', pronunciation: english };
+            
+            return {
+                english: item.english.charAt(0).toUpperCase() + item.english.slice(1),
+                hindi: item.translation, // This will be the translated name
+                pronunciation: mapping.pronunciation,
+                class: mapping.class
+            };
+        });
+        
+        console.log('Colors data:', colors);
 
         let learnedColors = new Set();
 
@@ -331,7 +364,7 @@
             cards[index].style.border = '2px solid #6c5ce7';
             
             // Play audio automatically when clicked
-            playAudio(colors[index].hindi);
+            playAudio(colors[index].hindi, targetLanguage);
         }
 
         function updateProgress() {
@@ -360,13 +393,32 @@
             }
         }
 
-        function playAudio(text) {
+        function playAudio(text, targetLang = 'hindi') {
             // Create audio using Web Speech API or fetch from server
             try {
                 // Try to use browser's speech synthesis first
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'hi-IN';
+                    
+                    // Map target language to speech synthesis language codes
+                    const langMap = {
+                        'hindi': 'hi-IN',
+                        'bengali': 'bn-IN',
+                        'tamil': 'ta-IN',
+                        'telugu': 'te-IN',
+                        'marathi': 'mr-IN',
+                        'gujarati': 'gu-IN',
+                        'kannada': 'kn-IN',
+                        'malayalam': 'ml-IN',
+                        'punjabi': 'pa-IN',
+                        'urdu': 'ur-IN',
+                        'assamese': 'as-IN',
+                        'odia': 'or-IN',
+                        'nepali': 'ne-NP',
+                        'sindhi': 'sd-IN'
+                    };
+                    
+                    utterance.lang = langMap[targetLang] || 'hi-IN'; // Default to Hindi
                     utterance.rate = 0.8;
                     speechSynthesis.speak(utterance);
                 } else {

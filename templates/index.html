@@ -63,6 +63,29 @@
             background: #caf0f8;
             color: #023e8a;
         }
+        
+        .language-selector {
+            background: #0077b6;
+            color: white;
+            border: 1px solid #023e8a;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .language-selector:focus {
+            outline: none;
+            background: #023e8a;
+        }
+        
+        .content-translatable {
+            transition: opacity 0.3s ease;
+        }
+        
+        .translating {
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -79,18 +102,128 @@
             <a href="{{ url_for('game') }}">Practice Game</a>
         </div>
         <div>
+            <select id="languageSelector" class="language-selector" onchange="changeLanguage()">
+                <option value="english">English</option>
+                <option value="hindi">हिंदी (Hindi)</option>
+                <option value="bengali">বাংলা (Bengali)</option>
+                <option value="gujarati">ગુજરાતી (Gujarati)</option>
+                <option value="kannada">ಕನ್ನಡ (Kannada)</option>
+                <option value="malayalam">മലയാളം (Malayalam)</option>
+                <option value="marathi">मराठी (Marathi)</option>
+                <option value="tamil">தமிழ் (Tamil)</option>
+                <option value="telugu">తెలుగు (Telugu)</option>
+                <option value="urdu">اردو (Urdu)</option>
+                <option value="punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+            </select>
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('signup') }}">Sign Up</a>
         </div>
     </nav>
 
     <section class="hero">
-        <h1>Learn Indian Languages Easily</h1>
-        <p>Practice vocabulary, pronunciation, and conversations with our smart AI-powered chatbot.</p>
+        <h1 class="content-translatable" data-key="hero-title">Learn Indian Languages Easily</h1>
+        <p class="content-translatable" data-key="hero-subtitle">Practice vocabulary, pronunciation, and conversations with our smart AI-powered chatbot.</p>
         <div class="cta">
-            <a href="{{ url_for('login') }}">Get Started</a>
+            <a href="{{ url_for('login') }}" class="content-translatable" data-key="get-started-btn">Get Started</a>
         </div>
     </section>
+
+    <script>
+        // Translation management
+        let currentLanguage = 'english';
+        
+        // Translation data - this would normally come from the API
+        const translations = {
+            'hero-title': {
+                'english': 'Learn Indian Languages Easily',
+                'hindi': 'आसानी से भारतीय भाषाएं सीखें',
+                'tamil': 'இந்திய மொழிகளை எளிதாக கற்றுக் கொள்ளுங்கள்',
+                'bengali': 'সহজে ভারতীয় ভাষা শিখুন'
+            },
+            'hero-subtitle': {
+                'english': 'Practice vocabulary, pronunciation, and conversations with our smart AI-powered chatbot.',
+                'hindi': 'हमारे स्मार्ट AI-चालित चैटबॉट के साथ शब्दावली, उच्चारण और बातचीत का अभ्यास करें।',
+                'tamil': 'எங்கள் புத்திசாலித்தனமான AI-இயங்கும் சாட்பாட்டுடன் சொல்லகராதி, உச்சரிப்பு மற்றும் உரையாடல்களை பயிற்சி செய்யுங்கள்.',
+                'bengali': 'আমাদের স্মার্ট AI-চালিত চ্যাটবটের সাথে শব্দভাণ্ডার, উচ্চারণ এবং কথোপকথনের অনুশীলন করুন।'
+            },
+            'get-started-btn': {
+                'english': 'Get Started',
+                'hindi': 'शुरू करें',
+                'tamil': 'தொடங்குங்கள்',
+                'bengali': 'শুরু করুন'
+            }
+        };
+        
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            const selectedLanguage = selector.value;
+            
+            if (selectedLanguage === currentLanguage) return;
+            
+            // Add translating effect
+            document.querySelectorAll('.content-translatable').forEach(el => {
+                el.classList.add('translating');
+            });
+            
+            // Update language preference
+            fetch('/api/user/language-preference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    preferred_language: selectedLanguage
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      currentLanguage = selectedLanguage;
+                      updatePageContent(selectedLanguage);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error updating language preference:', error);
+                  // Still update the page content even if API fails
+                  currentLanguage = selectedLanguage;
+                  updatePageContent(selectedLanguage);
+              });
+        }
+        
+        function updatePageContent(language) {
+            // Update translatable content
+            document.querySelectorAll('.content-translatable').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (translations[key] && translations[key][language]) {
+                    element.textContent = translations[key][language];
+                }
+                
+                // Remove translating effect
+                setTimeout(() => {
+                    element.classList.remove('translating');
+                }, 300);
+            });
+        }
+        
+        // Load user's preferred language on page load
+        function loadUserLanguagePreference() {
+            fetch('/api/user/language-preference')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.preferred_language) {
+                        const selector = document.getElementById('languageSelector');
+                        selector.value = data.preferred_language;
+                        currentLanguage = data.preferred_language;
+                        updatePageContent(data.preferred_language);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading language preference:', error);
+                });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadUserLanguagePreference);
+    </script>
 
 
 </body>

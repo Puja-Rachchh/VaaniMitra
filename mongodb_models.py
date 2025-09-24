@@ -222,3 +222,220 @@ class UserProgress:
             progress.updated_at = progress_data.get('updated_at')
             return progress
         return None
+
+
+class MultilingualVocabulary:
+    """Class to handle multilingual vocabulary storage and retrieval"""
+    
+    def __init__(self, category=None, key=None, english=None, translations=None, _id=None):
+        self.category = category
+        self.key = key
+        self.english = english
+        self.translations = translations or {}
+        self._id = _id
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+    
+    def save(self):
+        """Save multilingual vocabulary to MongoDB"""
+        vocab_data = {
+            'category': self.category,
+            'key': self.key,
+            'english': self.english,
+            'translations': self.translations,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+        
+        if self._id:
+            # Update existing vocabulary
+            mongo.db.multilingual_vocabulary.update_one(
+                {'_id': ObjectId(self._id)},
+                {'$set': vocab_data}
+            )
+        else:
+            # Create new vocabulary or update existing
+            existing = mongo.db.multilingual_vocabulary.find_one({
+                'category': self.category,
+                'key': self.key
+            })
+            
+            if existing:
+                mongo.db.multilingual_vocabulary.update_one(
+                    {'_id': existing['_id']},
+                    {'$set': vocab_data}
+                )
+                self._id = existing['_id']
+            else:
+                result = mongo.db.multilingual_vocabulary.insert_one(vocab_data)
+                self._id = result.inserted_id
+        
+        return self
+    
+    def add_translation(self, language, translation):
+        """Add translation for a specific language"""
+        self.translations[language] = translation
+        self.updated_at = datetime.utcnow()
+        return self.save()
+    
+    def get_translation(self, language):
+        """Get translation for a specific language"""
+        return self.translations.get(language, self.english)
+    
+    @staticmethod
+    def get_vocabulary_by_category(category, language='english'):
+        """Get all vocabulary items for a category in specified language"""
+        vocabulary = []
+        for vocab_data in mongo.db.multilingual_vocabulary.find({'category': category}):
+            item = {
+                'key': vocab_data['key'],
+                'english': vocab_data['english'],
+                'translation': vocab_data['translations'].get(language, vocab_data['english']),
+                'category': vocab_data['category']
+            }
+            vocabulary.append(item)
+        return vocabulary
+    
+    @staticmethod
+    def get_all_categories():
+        """Get all available vocabulary categories"""
+        categories = mongo.db.multilingual_vocabulary.distinct('category')
+        return categories
+    
+    @staticmethod
+    def get_supported_languages():
+        """Get all languages that have translations"""
+        languages = set(['english'])  # English is always supported
+        for vocab_data in mongo.db.multilingual_vocabulary.find():
+            languages.update(vocab_data.get('translations', {}).keys())
+        return list(languages)
+    
+    @staticmethod
+    def find_by_key(category, key):
+        """Find vocabulary item by category and key"""
+        vocab_data = mongo.db.multilingual_vocabulary.find_one({
+            'category': category,
+            'key': key
+        })
+        
+        if vocab_data:
+            vocab = MultilingualVocabulary()
+            vocab._id = vocab_data['_id']
+            vocab.category = vocab_data['category']
+            vocab.key = vocab_data['key']
+            vocab.english = vocab_data['english']
+            vocab.translations = vocab_data.get('translations', {})
+            vocab.created_at = vocab_data.get('created_at')
+            vocab.updated_at = vocab_data.get('updated_at')
+            return vocab
+        return None
+    
+    @staticmethod
+    def bulk_create_vocabulary(vocabulary_data):
+        """Bulk create vocabulary items"""
+        items_to_insert = []
+        for category, items in vocabulary_data.items():
+            for key, data in items.items():
+                item = {
+                    'category': category,
+                    'key': key,
+                    'english': data.get('english', key),
+                    'translations': data.get('translations', {}),
+                    'created_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
+                }
+                items_to_insert.append(item)
+        
+        if items_to_insert:
+            result = mongo.db.multilingual_vocabulary.insert_many(items_to_insert)
+            return len(result.inserted_ids)
+        return 0
+
+
+class UserLanguagePreference:
+    """Class to handle user language preferences"""
+    
+    def __init__(self, user_id=None, preferred_language=None, 
+                 native_language=None, learning_languages=None, _id=None):
+        self.user_id = user_id
+        self.preferred_language = preferred_language or 'english'
+        self.native_language = native_language or 'english'
+        self.learning_languages = learning_languages or []
+        self._id = _id
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
+    
+    def save(self):
+        """Save language preferences to MongoDB"""
+        pref_data = {
+            'user_id': ObjectId(self.user_id),
+            'preferred_language': self.preferred_language,
+            'native_language': self.native_language,
+            'learning_languages': self.learning_languages,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+        
+        if self._id:
+            # Update existing preferences
+            mongo.db.user_language_preferences.update_one(
+                {'_id': ObjectId(self._id)},
+                {'$set': pref_data}
+            )
+        else:
+            # Create new preferences or update existing
+            existing = mongo.db.user_language_preferences.find_one({
+                'user_id': ObjectId(self.user_id)
+            })
+            
+            if existing:
+                mongo.db.user_language_preferences.update_one(
+                    {'_id': existing['_id']},
+                    {'$set': pref_data}
+                )
+                self._id = existing['_id']
+            else:
+                result = mongo.db.user_language_preferences.insert_one(pref_data)
+                self._id = result.inserted_id
+        
+        return self
+    
+    def add_learning_language(self, language):
+        """Add a language to learning list"""
+        if language not in self.learning_languages:
+            self.learning_languages.append(language)
+            self.updated_at = datetime.utcnow()
+            return self.save()
+        return self
+    
+    def remove_learning_language(self, language):
+        """Remove a language from learning list"""
+        if language in self.learning_languages:
+            self.learning_languages.remove(language)
+            self.updated_at = datetime.utcnow()
+            return self.save()
+        return self
+    
+    @staticmethod
+    def get_user_preferences(user_id):
+        """Get language preferences for a user"""
+        pref_data = mongo.db.user_language_preferences.find_one({
+            'user_id': ObjectId(user_id)
+        })
+        
+        if pref_data:
+            pref = UserLanguagePreference()
+            pref._id = pref_data['_id']
+            pref.user_id = pref_data['user_id']
+            pref.preferred_language = pref_data['preferred_language']
+            pref.native_language = pref_data['native_language']
+            pref.learning_languages = pref_data['learning_languages']
+            pref.created_at = pref_data.get('created_at')
+            pref.updated_at = pref_data.get('updated_at')
+            return pref
+        return None
+
+
+def get_database():
+    """Get database instance"""
+    return mongo.db

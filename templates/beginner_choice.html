@@ -24,6 +24,25 @@
             text-align: center;
         }
 
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .language-selector select {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #2c3e50;
+            cursor: pointer;
+            outline: none;
+        }
+
         h1 {
             color: #2c3e50;
             margin-bottom: 30px;
@@ -32,10 +51,11 @@
         }
 
         .choice-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            justify-content: center;
             margin-top: 40px;
+            max-width: 800px;
         }
 
         .choice-card {
@@ -72,23 +92,212 @@
             color: #666;
             line-height: 1.4;
         }
+
+        .loading {
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="bengali">বাংলা</option>
+            <option value="tamil">தமிழ்</option>
+            <option value="telugu">తెలుగు</option>
+            <option value="marathi">मराठी</option>
+            <option value="gujarati">ગુજરાતી</option>
+            <option value="kannada">ಕನ್ನಡ</option>
+            <option value="malayalam">മലയാളം</option>
+            <option value="punjabi">ਪੰਜਾਬੀ</option>
+            <option value="urdu">اردو</option>
+            <option value="assamese">অসমীয়া</option>
+            <option value="odia">ଓଡ଼ିଆ</option>
+            <option value="nepali">नेपाली</option>
+            <option value="sindhi">سنڌي</option>
+        </select>
+    </div>
+
     <div class="container">
-        <h1>Choose Your Learning Path</h1>
+        <h1 id="pageTitle">Choose Your Learning Path</h1>
         <div class="choice-container">
-            <a href="{{ url_for('hindi_letters') }}" class="choice-card">
+            <a href="{{ url_for('language_letters') }}" class="choice-card">
                 <div class="icon">📚</div>
-                <div class="title">Learn Letters</div>
-                <div class="description">Start with basic Hindi letters and their pronunciations</div>
+                <div class="title" id="learnLettersTitle">Learn Letters</div>
+                <div class="description" id="learnLettersDesc">Start with basic Hindi letters and their pronunciations</div>
             </a>
             <a href="{{ url_for('beginner_quiz') }}" class="choice-card">
                 <div class="icon">✍️</div>
-                <div class="title">Take Quiz</div>
-                <div class="description">Test your knowledge of Hindi letters</div>
+                <div class="title" id="takeQuizTitle">Take Quiz</div>
+                <div class="description" id="takeQuizDesc">Test your knowledge of Hindi letters</div>
+            </a>
+            <a href="{{ url_for('beginner_pronunciation') }}" class="choice-card">
+                <div class="icon">🎤</div>
+                <div class="title" id="practicePronunciationTitle">Practice Pronunciation</div>
+                <div class="description" id="practicePronunciationDesc">Improve your speaking skills with pronunciation exercises</div>
             </a>
         </div>
     </div>
+
+    <script>
+        // Translation content for different languages
+        const translations = {
+            pageTitle: {
+                english: "Choose Your Learning Path",
+                hindi: "अपना सीखने का रास्ता चुनें",
+                bengali: "আপনার শেখার পথ বেছে নিন",
+                tamil: "உங்கள் கற்றல் பாதையை தேர்வு செய்யுங்கள்",
+                telugu: "మీ అభ్యాస మార్గాన్ని ఎంచుకోండి",
+                marathi: "तुमचा शिकण्याचा मार्ग निवडा",
+                gujarati: "તમારો શીખવાનો માર્ગ પસંદ કરો",
+                kannada: "ನಿಮ್ಮ ಕಲಿಕೆಯ ಮಾರ್ಗವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
+                malayalam: "നിങ്ങളുടെ പഠന പാത തിരഞ്ഞെടുക്കുക",
+                punjabi: "ਆਪਣਾ ਸਿੱਖਣ ਦਾ ਰਸਤਾ ਚੁਣੋ",
+                urdu: "اپنا سیکھنے کا راستہ منتخب کریں",
+                assamese: "আপোনাৰ শিক্ষণৰ পথ বাছক",
+                odia: "ତୁମର ଶିଖିବାର ପଥ ବାଛ",
+                nepali: "तपाईंको सिक्ने बाटो छनोट गर्नुहोस्",
+                sindhi: "پنهنجو سکڻ جو رستو چونڊيو"
+            },
+            learnLettersTitle: {
+                english: "Learn Letters",
+                hindi: "अक्षर सीखें",
+                bengali: "অক্ষর শিখুন",
+                tamil: "எழுத்துக்களை கற்றுக்கொள்ளுங்கள்",
+                telugu: "అక్షరాలను నేర్చుకోండి",
+                marathi: "अक्षरे शिका",
+                gujarati: "અક્ષરો શીખો",
+                kannada: "ಅಕ್ಷರಗಳನ್ನು ಕಲಿಯಿರಿ",
+                malayalam: "അക്ഷരങ്ങൾ പഠിക്കുക",
+                punjabi: "ਅਖਰ ਸਿੱਖੋ",
+                urdu: "حروف سیکھیں",
+                assamese: "আখৰ শিকক",
+                odia: "ଅକ୍ଷର ଶିଖନ୍ତୁ",
+                nepali: "अक्षरहरू सिक्नुहोस्",
+                sindhi: "اکر سکو"
+            },
+            learnLettersDesc: {
+                english: "Start with basic Hindi letters and their pronunciations",
+                hindi: "बुनियादी हिंदी अक्षरों और उनके उच्चारण से शुरुआत करें",
+                bengali: "মৌলিক হিন্দি অক্ষর এবং তাদের উচ্চারণ দিয়ে শুরু করুন",
+                tamil: "அடிப்படை இந்தி எழுத்துக்கள் மற்றும் அவற்றின் உச்சரிப்புடன் தொடங்குங்கள்",
+                telugu: "ప్రాథమిక హిందీ అక్షరాలు మరియు వాటి ఉచ్చారణతో ప్రారంభించండి",
+                marathi: "मूलभूत हिंदी अक्षरे आणि त्यांचे उच्चारण यापासून सुरुवात करा",
+                gujarati: "મૂળભૂત હિન્દી અક્ષરો અને તેમના ઉચ્ચારણથી શરૂઆત કરો",
+                kannada: "ಮೂಲಭೂತ ಹಿಂದಿ ಅಕ್ಷರಗಳು ಮತ್ತು ಅವುಗಳ ಉಚ್ಚಾರಣೆಯೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸಿ",
+                malayalam: "അടിസ്ഥാന ഹിന്ദി അക്ഷരങ്ങളും അവയുടെ ഉച്ചാരണവും കൊണ്ട് ആരംഭിക്കുക",
+                punjabi: "ਬੁਨਿਆਦੀ ਹਿੰਦੀ ਅਖਰਾਂ ਅਤੇ ਉਨ੍ਹਾਂ ਦੇ ਉਚਾਰਨ ਨਾਲ ਸ਼ੁਰੂਆਤ ਕਰੋ",
+                urdu: "بنیادی ہندی حروف اور ان کی ادائیگی سے شروعات کریں",
+                assamese: "মৌলিক হিন্দী আখৰ আৰু সিহঁতৰ উচ্চাৰণৰ সৈতে আৰম্ভ কৰক",
+                odia: "ମୌଳିକ ହିନ୍ଦୀ ଅକ୍ଷର ଏବଂ ସେମାନଙ୍କର ଉଚ୍ଚାରଣ ସହିତ ଆରମ୍ଭ କରନ୍ତୁ",
+                nepali: "आधारभूत हिन्दी अक्षरहरू र तिनीहरूको उच्चारणसँग सुरु गर्नुहोस्",
+                sindhi: "بنيادي هندي اکرن ۽ انهن جي تلفظ سان شروعات ڪريو"
+            },
+            takeQuizTitle: {
+                english: "Take Quiz",
+                hindi: "क्विज़ लें",
+                bengali: "কুইজ নিন",
+                tamil: "வினாடி வினா எடுங்கள்",
+                telugu: "క్విజ్ తీసుకోండి",
+                marathi: "क्विझ घ्या",
+                gujarati: "ક્વિઝ લો",
+                kannada: "ಪ್ರಶ್ನಾವಳಿ ತೆಗೆದುಕೊಳ್ಳಿ",
+                malayalam: "ക്വിസ് എടുക്കുക",
+                punjabi: "ਕੁਇਜ਼ ਲਓ",
+                urdu: "کوئز لیں",
+                assamese: "কুইজ ল'ব",
+                odia: "କୁଇଜ୍ ନିଅନ୍ତୁ",
+                nepali: "क्विज लिनुहोस्",
+                sindhi: "ڪوئز وٺو"
+            },
+            takeQuizDesc: {
+                english: "Test your knowledge of Hindi letters",
+                hindi: "हिंदी अक्षरों की अपनी जानकारी का परीक्षण करें",
+                bengali: "হিন্দি অক্ষরের আপনার জ্ঞান পরীক্ষা করুন",
+                tamil: "இந்தி எழுத்துக்களின் உங்கள் அறிவை சோதிக்கவும்",
+                telugu: "హిందీ అక్షరాల గురించి మీ జ్ఞానాన్ని పరీక్షించండి",
+                marathi: "हिंदी अक्षरांचे तुमचे ज्ञान तपासा",
+                gujarati: "હિન્દી અક્ષરોનું તમારું જ્ઞાન ચકાસો",
+                kannada: "ಹಿಂದಿ ಅಕ್ಷರಗಳ ನಿಮ್ಮ ಜ್ಞಾನವನ್ನು ಪರೀಕ್ಷಿಸಿ",
+                malayalam: "ഹിന്ദി അക്ഷരങ്ങളെക്കുറിച്ചുള്ള നിങ്ങളുടെ അറിവ് പരിശോധിക്കുക",
+                punjabi: "ਹਿੰਦੀ ਅਖਰਾਂ ਦੀ ਆਪਣੀ ਜਾਣਕਾਰੀ ਦੀ ਜਾਂਚ ਕਰੋ",
+                urdu: "ہندی حروف کے اپنے علم کو آزمائیں",
+                assamese: "হিন্দী আখৰৰ আপোনাৰ জ্ঞান পৰীক্ষা কৰক",
+                odia: "ହିନ୍ଦୀ ଅକ୍ଷରର ଆପଣଙ୍କର ଜ୍ଞାନ ପରୀକ୍ଷା କରନ୍ତୁ",
+                nepali: "हिन्दी अक्षरहरूको तपाईंको ज्ञान परीक्षण गर्नुहोस्",
+                sindhi: "هندي اکرن جي پنهنجي ڄاڻ کي آزمايو"
+            },
+            practicePronunciationTitle: {
+                english: "Practice Pronunciation",
+                hindi: "उच्चारण अभ्यास करें",
+                bengali: "উচ্চারণ অনুশীলন করুন",
+                tamil: "உச்சரிப்பை பயிற்சி செய்யுங்கள்",
+                telugu: "ఉచ్చారణ అభ్యాసం చేయండి",
+                marathi: "उच्चारण सराव करा",
+                gujarati: "ઉચ્ચારણ અભ્યાસ કરો",
+                kannada: "ಉಚ್ಚಾರಣ ಅಭ್ಯಾಸ ಮಾಡಿ",
+                malayalam: "ഉച്ചാരണം പരിശീലിക്കുക",
+                punjabi: "ਉਚਾਰਨ ਅਭਿਆਸ ਕਰੋ",
+                urdu: "تلفظ کی مشق کریں",
+                assamese: "উচ্চাৰণ অনুশীলন কৰক",
+                odia: "ଉଚ୍ଚାରଣ ଅନୁଶୀଳନ କରନ୍ତୁ",
+                nepali: "उच्चारण अभ्यास गर्नुहोस्",
+                sindhi: "تلفظ جو مشق ڪريو"
+            },
+            practicePronunciationDesc: {
+                english: "Improve your speaking skills with pronunciation exercises",
+                hindi: "उच्चारण अभ्यास के साथ अपनी बोलने की क्षमता में सुधार करें",
+                bengali: "উচ্চারণ অনুশীলনের মাধ্যমে আপনার কথা বলার দক্ষতা উন্নত করুন",
+                tamil: "உச்சரிப்பு பயிற்சிகளுடன் உங்கள் பேச்சுத் திறனை மேம்படுத்துங்கள்",
+                telugu: "ఉచ్చారణ అభ్యాసాలతో మీ మాట్లాడే నైపుణ్యాన్ని మెరుగుపరచండి",
+                marathi: "उच्चारण सरावासह तुमच्या बोलण्याच्या कौशल्यात सुधारणा करा",
+                gujarati: "ઉચ્ચારણ અભ્યાસ સાથે તમારી બોલવાની કુશળતામાં સુધારો કરો",
+                kannada: "ಉಚ್ಚಾರಣ ಅಭ್ಯಾಸಗಳೊಂದಿಗೆ ನಿಮ್ಮ ಮಾತನಾಡುವ ಕೌಶಲ್ಯವನ್ನು ಸುಧಾರಿಸಿ",
+                malayalam: "ഉച്ചാരണ അഭ്യാസങ്ങളോടെ നിങ്ങളുടെ സംസാര കഴിവ് മെച്ചപ്പെടുത്തുക",
+                punjabi: "ਉਚਾਰਨ ਅਭਿਆਸਾਂ ਨਾਲ ਆਪਣੀ ਬੋਲਣ ਦੀ ਮਹਾਰਤ ਵਿੱਚ ਸੁਧਾਰ ਕਰੋ",
+                urdu: "تلطفظ کی مشقوں کے ساتھ اپنی بولنے کی صلاحیت کو بہتر بنائیں",
+                assamese: "উচ্চাৰণ অনুশীলনৰ সৈতে আপোনাৰ কথা কোৱাৰ দক্ষতা উন্নত কৰক",
+                odia: "ଉଚ୍ଚାରଣ ଅନୁଶୀଳନ ସହିତ ଆପଣଙ୍କର କଥା କହିବାର କୌଶଳ ଉନ୍ନତ କରନ୍ତୁ",
+                nepali: "उच्चारण अभ्यासहरूसँग तपाईंको बोल्ने सीप सुधार गर्नुहोस्",
+                sindhi: "تلفظ جي مشقن سان پنهنجي ڳالهائڻ جي صلاحيت کي بهتر بڻايو"
+            }
+        };
+
+        function changeLanguage() {
+            const selectedLanguage = document.getElementById('languageSelect').value;
+            const container = document.querySelector('.container');
+            
+            // Add loading effect
+            container.classList.add('loading');
+            
+            // Update text content
+            setTimeout(() => {
+                document.getElementById('pageTitle').textContent = translations.pageTitle[selectedLanguage];
+                document.getElementById('learnLettersTitle').textContent = translations.learnLettersTitle[selectedLanguage];
+                document.getElementById('learnLettersDesc').textContent = translations.learnLettersDesc[selectedLanguage];
+                document.getElementById('takeQuizTitle').textContent = translations.takeQuizTitle[selectedLanguage];
+                document.getElementById('takeQuizDesc').textContent = translations.takeQuizDesc[selectedLanguage];
+                document.getElementById('practicePronunciationTitle').textContent = translations.practicePronunciationTitle[selectedLanguage];
+                document.getElementById('practicePronunciationDesc').textContent = translations.practicePronunciationDesc[selectedLanguage];
+                
+                // Store language preference
+                localStorage.setItem('preferredLanguage', selectedLanguage);
+                
+                // Remove loading effect
+                container.classList.remove('loading');
+            }, 300);
+        }
+
+        // Load saved language preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLanguage = localStorage.getItem('preferredLanguage');
+            if (savedLanguage) {
+                document.getElementById('languageSelect').value = savedLanguage;
+                changeLanguage();
+            }
+        });
+    </script>
 </body>
 </html>

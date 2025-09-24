@@ -52,6 +52,23 @@
             box-sizing: border-box;
             font-size: 16px;
         }
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: white;
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #023e8a;
+            font-weight: 500;
+        }
         button {
             width: 100%;
             padding: 12px;
@@ -107,6 +124,53 @@
         <form method="POST" action="{{ url_for('signup') }}">
             <input type="text" name="username" placeholder="Username" required /><br>
             <input type="password" name="password" placeholder="Password" required /><br>
+            
+            <label for="known_language">Language you already know:</label>
+            <select name="known_language" id="known_language" required>
+                <option value="">Select your known language</option>
+                <option value="english">English</option>
+                <option value="hindi">हिंदी (Hindi)</option>
+                <option value="bengali">বাংলা (Bengali)</option>
+                <option value="tamil">தமிழ் (Tamil)</option>
+                <option value="telugu">తెలుగు (Telugu)</option>
+                <option value="marathi">मराठी (Marathi)</option>
+                <option value="gujarati">ગુજરાતી (Gujarati)</option>
+                <option value="kannada">ಕನ್ನಡ (Kannada)</option>
+                <option value="malayalam">മലയാളം (Malayalam)</option>
+                <option value="punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+                <option value="urdu">اردو (Urdu)</option>
+                <option value="assamese">অসমীয়া (Assamese)</option>
+                <option value="odia">ଓଡ଼ିଆ (Odia)</option>
+                <option value="nepali">नेपाली (Nepali)</option>
+                <option value="sindhi">سنڌي (Sindhi)</option>
+            </select><br>
+            
+            <label for="target_language">Language you want to learn:</label>
+            <select name="target_language" id="target_language" required>
+                <option value="">Select language to learn</option>
+                <option value="hindi">हिंदी (Hindi)</option>
+                <option value="bengali">বাংলা (Bengali)</option>
+                <option value="tamil">தமிழ் (Tamil)</option>
+                <option value="telugu">తెలుగు (Telugu)</option>
+                <option value="marathi">मराठी (Marathi)</option>
+                <option value="gujarati">ગુજરાતી (Gujarati)</option>
+                <option value="kannada">ಕನ್ನಡ (Kannada)</option>
+                <option value="malayalam">മലയാളം (Malayalam)</option>
+                <option value="punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+                <option value="urdu">اردو (Urdu)</option>
+                <option value="assamese">অসমীয়া (Assamese)</option>
+                <option value="odia">ଓଡ଼ିଆ (Odia)</option>
+                <option value="nepali">नेपाली (Nepali)</option>
+                <option value="sindhi">سنڌي (Sindhi)</option>
+            </select><br>
+            
+            <label for="level">Learning Level:</label>
+            <select name="level" id="level" required>
+                <option value="">Select your level</option>
+                <option value="Beginner">Beginner (Learn letters and basics)</option>
+                <option value="Intermediate">Intermediate (Learn vocabulary)</option>
+            </select><br>
+            
             <button type="submit">Create Account</button>
         </form>
         <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
