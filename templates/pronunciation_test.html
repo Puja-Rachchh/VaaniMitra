@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Pronunciation Test - VaaniMitra</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .test-card {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn:disabled { background: #6c757d; cursor: not-allowed; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .recording { color: #dc3545; font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Advanced Pronunciation Testing</h1>
+        <p>Comprehensive test suite for pronunciation recognition system</p>
+        <!-- Test 1: Basic Recognition -->
+        <div class="test-card">
+            <h3>Test 1: Basic Speech Recognition</h3>
+            <p>Say "hello" when you click Record</p>
+            <button class="btn btn-primary" onclick="testBasicRecognition()">🎤 Test Recognition</button>
+            <div id="basic-status" class="status" style="display:none;"></div>
+            <div id="basic-transcript" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- Test 2: Simple Word Pronunciation -->
+        <div class="test-card">
+            <h3>Test 2: Word Pronunciation</h3>
+            <p><strong>Target word:</strong> <span id="target-word">apple</span></p>
+            <p><strong>Say:</strong> "apple" (or "ae-pul" if learning)</p>
+            <button class="btn btn-success" onclick="testWordPronunciation()">🎤 Record Pronunciation</button>
+            <button class="btn btn-primary" onclick="playTestAudio()">🔊 Listen</button>
+            <div id="word-status" class="status" style="display:none;"></div>
+            <div id="word-transcript" style="margin-top:10px;"></div>
+            <div id="word-feedback" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- Test 3: Multi-word Test -->
+        <div class="test-card">
+            <h3>Test 3: Multiple Words</h3>
+            <p>Test different vocabulary words</p>
+            <div style="margin: 10px 0;">
+                <button class="btn btn-primary" onclick="setTestWord('banana')">banana</button>
+                <button class="btn btn-primary" onclick="setTestWord('mango')">mango</button>
+                <button class="btn btn-primary" onclick="setTestWord('orange')">orange</button>
+            </div>
+            <p><strong>Current word:</strong> <span id="multi-target">apple</span></p>
+            <button class="btn btn-success" onclick="testMultiWord()">🎤 Test Word</button>
+            <div id="multi-status" class="status" style="display:none;"></div>
+            <div id="multi-result" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- Test 4: Browser Support Check -->
+        <div class="test-card">
+            <h3>Test 4: System Compatibility</h3>
+            <div id="browser-support"></div>
+            <button class="btn btn-primary" onclick="checkBrowserSupport()">Check Support</button>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="test-card">
+            <h3>📊 Test Results Summary</h3>
+            <div id="test-results">
+                <p>Run tests above to see results...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isRecording = false;
+        let testResults = {
+            basicRecognition: null,
+            wordPronunciation: null,
+            multiWord: null,
+            browserSupport: null
+        };
+
+        // Pronunciation variants for different words
+        const pronunciationVariants = {
+            'apple': ['apple', 'apl', 'apul', 'ae-pul'],
+            'banana': ['banana', 'buh-nana', 'nana', 'ba-na-na'],
+            'mango': ['mango', 'man-go', 'manggo'],
+            'orange': ['orange', 'or-anj', 'oringe', 'ornge'],
+            'hello': ['hello', 'helo', 'hi', 'hey']
+        };
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                recognition.maxAlternatives = 3;
+                return true;
+            }
+            return false;
+        }
+
+        // Test 1: Basic Recognition
+        function testBasicRecognition() {
+            if (!initSpeechRecognition()) {
+                showStatus('basic-status', '❌ Speech recognition not supported in this browser', 'error');
+                testResults.basicRecognition = false;
+                updateResults();
+                return;
+            }
+
+            const btn = event.target;
+            if (isRecording) {
+                recognition.stop();
+                return;
+            }
+
+            btn.textContent = '⏹️ Stop Recording';
+            btn.className = 'btn btn-danger';
+            isRecording = true;
+            showStatus('basic-status', '🎤 Listening... Say "hello"', 'info');
+            document.getElementById('basic-transcript').innerHTML = '<div class="recording">🎤 Recording...</div>';
+
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    document.getElementById('basic-transcript').innerHTML = `<strong>You said:</strong> "${finalTranscript}"`;
+                    if (finalTranscript.toLowerCase().includes('hello') || finalTranscript.toLowerCase().includes('hi')) {
+                        showStatus('basic-status', '✅ Success! Recognition working correctly', 'success');
+                        testResults.basicRecognition = true;
+                    } else {
+                        showStatus('basic-status', `⚠️ Expected "hello" but heard "${finalTranscript}". Try again.`, 'error');
+                        testResults.basicRecognition = false;
+                    }
+                    updateResults();
+                }
+            };
+
+            recognition.onend = function() {
+                btn.textContent = '🎤 Test Recognition';
+                btn.className = 'btn btn-primary';
+                isRecording = false;
+            };
+
+            recognition.onerror = function(event) {
+                showStatus('basic-status', `❌ Error: ${event.error}`, 'error');
+                btn.textContent = '🎤 Test Recognition';
+                btn.className = 'btn btn-primary';
+                isRecording = false;
+                testResults.basicRecognition = false;
+                updateResults();
+            };
+
+            recognition.start();
+        }
+
+        // Test 2: Word Pronunciation
+        function testWordPronunciation() {
+            if (!initSpeechRecognition()) {
+                showStatus('word-status', '❌ Speech recognition not supported', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            const targetWord = document.getElementById('target-word').textContent;
+
+            if (isRecording) {
+                recognition.stop();
+                return;
+            }
+
+            btn.textContent = '⏹️ Stop Recording';
+            btn.className = 'btn btn-danger';
+            isRecording = true;
+            showStatus('word-status', `🎤 Say "${targetWord}"`, 'info');
+            document.getElementById('word-transcript').innerHTML = '<div class="recording">🎤 Recording...</div>';
+
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    document.getElementById('word-transcript').innerHTML = `<strong>Heard:</strong> "${finalTranscript}"`;
+                    const evaluation = evaluateWordPronunciation(finalTranscript, targetWord);
+                    document.getElementById('word-feedback').innerHTML = evaluation.html;
+                    testResults.wordPronunciation = evaluation.success;
+                    updateResults();
+                }
+            };
+
+            recognition.onend = function() {
+                btn.textContent = '🎤 Record Pronunciation';
+                btn.className = 'btn btn-success';
+                isRecording = false;
+            };
+
+            recognition.onerror = function(event) {
+                showStatus('word-status', `❌ Error: ${event.error}`, 'error');
+                btn.textContent = '🎤 Record Pronunciation';
+                btn.className = 'btn btn-success';
+                isRecording = false;
+                testResults.wordPronunciation = false;
+                updateResults();
+            };
+
+            recognition.start();
+        }
+
+        // Test 3: Multi-word Test
+        function setTestWord(word) {
+            document.getElementById('multi-target').textContent = word;
+            document.getElementById('multi-result').innerHTML = '';
+            showStatus('multi-status', `Target word changed to "${word}"`, 'info');
+        }
+
+        function testMultiWord() {
+            if (!initSpeechRecognition()) {
+                showStatus('multi-status', '❌ Speech recognition not supported', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            const targetWord = document.getElementById('multi-target').textContent;
+
+            if (isRecording) {
+                recognition.stop();
+                return;
+            }
+
+            btn.textContent = '⏹️ Stop Recording';
+            btn.className = 'btn btn-danger';
+            isRecording = true;
+            showStatus('multi-status', `🎤 Say "${targetWord}"`, 'info');
+            document.getElementById('multi-result').innerHTML = '<div class="recording">🎤 Recording...</div>';
+
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    const evaluation = evaluateWordPronunciation(finalTranscript, targetWord);
+                    document.getElementById('multi-result').innerHTML = 
+                        `<strong>Said:</strong> "${finalTranscript}"<br>${evaluation.html}`;
+                    testResults.multiWord = evaluation.success;
+                    updateResults();
+                }
+            };
+
+            recognition.onend = function() {
+                btn.textContent = '🎤 Test Word';
+                btn.className = 'btn btn-success';
+                isRecording = false;
+            };
+
+            recognition.onerror = function(event) {
+                showStatus('multi-status', `❌ Error: ${event.error}`, 'error');
+                btn.textContent = '🎤 Test Word';
+                btn.className = 'btn btn-success';
+                isRecording = false;
+                testResults.multiWord = false;
+                updateResults();
+            };
+
+            recognition.start();
+        }
+
+        // Test 4: Browser Support Check
+        function checkBrowserSupport() {
+            const support = document.getElementById('browser-support');
+            let result = '<h4>System Compatibility Check:</h4><ul>';
+            let allSupported = true;
+            
+            // Speech Recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                result += '<li>✅ Speech Recognition: Supported</li>';
+            } else {
+                result += '<li>❌ Speech Recognition: Not Supported</li>';
+                allSupported = false;
+            }
+            
+            // Speech Synthesis
+            if ('speechSynthesis' in window) {
+                result += '<li>✅ Speech Synthesis: Supported</li>';
+            } else {
+                result += '<li>❌ Speech Synthesis: Not Supported</li>';
+            }
+            
+            // MediaDevices (Microphone)
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                result += '<li>✅ Microphone Access: Available</li>';
+            } else {
+                result += '<li>❌ Microphone Access: Not Available</li>';
+                allSupported = false;
+            }
+            
+            // Browser Detection
+            const userAgent = navigator.userAgent;
+            const browser = getBrowserName(userAgent);
+            result += `<li>📱 Browser: ${browser}</li>`;
+            
+            result += '</ul>';
+            
+            if (allSupported) {
+                result += '<div class="status success">✅ All systems ready for pronunciation testing!</div>';
+                testResults.browserSupport = true;
+            } else {
+                result += '<div class="status error">❌ Some features may not work. Try Chrome or Edge for best results.</div>';
+                testResults.browserSupport = false;
+            }
+            
+            support.innerHTML = result;
+            updateResults();
+        }
+
+        // Evaluate word pronunciation
+        function evaluateWordPronunciation(transcript, target) {
+            const normalizedTranscript = transcript.toLowerCase().trim();
+            const normalizedTarget = target.toLowerCase().trim();
+            
+            // Get pronunciation variants for the target word
+            const variants = pronunciationVariants[normalizedTarget] || [normalizedTarget];
+            
+            let matched = false;
+            let matchedVariant = '';
+            
+            // Check exact matches first
+            for (const variant of variants) {
+                if (normalizedTranscript.includes(variant.toLowerCase())) {
+                    matched = true;
+                    matchedVariant = variant;
+                    break;
+                }
+            }
+            
+            // If no exact match, try fuzzy matching
+            if (!matched) {
+                for (const variant of variants) {
+                    if (levenshteinDistance(normalizedTranscript, variant.toLowerCase()) <= 2) {
+                        matched = true;
+                        matchedVariant = variant;
+                        break;
+                    }
+                }
+            }
+
+            if (matched) {
+                return {
+                    success: true,
+                    html: `<div class="status success">✅ Excellent! Recognized as "${matchedVariant}"</div>`
+                };
+            } else {
+                return {
+                    success: false,
+                    html: `<div class="status error">❌ Try again. Expected "${normalizedTarget}" but heard "${transcript}". Try speaking more clearly.</div>`
+                };
+            }
+        }
+
+        // Play test audio
+        async function playTestAudio() {
+            const targetWord = document.getElementById('target-word').textContent;
+            try {
+                const response = await fetch('/play_word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word: targetWord, language: 'english' })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    audio.play();
+                    audio.onended = () => URL.revokeObjectURL(url);
+                    showStatus('word-status', `🔊 Playing "${targetWord}"`, 'info');
+                } else {
+                    showStatus('word-status', '❌ Audio playback failed', 'error');
+                }
+            } catch (error) {
+                showStatus('word-status', `❌ Audio error: ${error.message}`, 'error');
+            }
+        }
+
+        // Utility functions
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `status ${type}`;
+            el.style.display = 'block';
+        }
+
+        function updateResults() {
+            const results = document.getElementById('test-results');
+            let html = '<h4>Test Results:</h4><ul>';
+            let passedTests = 0;
+            let totalTests = 0;
+            
+            for (const [test, result] of Object.entries(testResults)) {
+                if (result !== null) totalTests++;
+                if (result === true) passedTests++;
+                
+                const status = result === true ? '✅ Passed' : result === false ? '❌ Failed' : '⏳ Not tested';
+                const testName = test.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                html += `<li><strong>${testName}:</strong> ${status}</li>`;
+            }
+            
+            html += '</ul>';
+            
+            if (totalTests > 0) {
+                const percentage = Math.round((passedTests / totalTests) * 100);
+                html += `<div class="status ${percentage >= 75 ? 'success' : percentage >= 50 ? 'info' : 'error'}">
+                    Overall Score: ${passedTests}/${totalTests} tests passed (${percentage}%)
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        function getBrowserName(userAgent) {
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) return 'Chrome';
+            if (userAgent.includes('Firefox')) return 'Firefox';
+            if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+            if (userAgent.includes('Edge')) return 'Edge';
+            if (userAgent.includes('Opera')) return 'Opera';
+            return 'Unknown';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateResults();
+            console.log('Advanced Pronunciation Test initialized');
+        });
+    </script>
+</body>
+</html>
+
+                recognition.onresult = function(event) {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        console.log(`Result ${i}: "${transcript}" (final: ${event.results[i].isFinal})`);
+                        
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    const displayText = finalTranscript || interimTranscript;
+                    document.getElementById('heard').textContent = `Heard: ${displayText || 'Listening...'}`;
+                    
+                    if (finalTranscript.trim()) {
+                        evaluatePronunciation(finalTranscript.trim());
+                    }
+                };
+
+                recognition.onend = function() {
+                    console.log('Recognition ended');
+                    isRecording = false;
+                    document.getElementById('recording').style.display = 'none';
+                    document.getElementById('recordBtn').textContent = '🎤 Record';
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Recognition error:', event.error);
+                    showFeedback(`Error: ${event.error}`, 'incorrect');
+                    isRecording = false;
+                    document.getElementById('recording').style.display = 'none';
+                    document.getElementById('recordBtn').textContent = '🎤 Record';
+                };
+                
+                console.log('Recognition initialized successfully');
+            } else {
+                showFeedback('Speech recognition not supported in this browser.', 'incorrect');
+            }
+        }
+
+        function toggleRecording() {
+            if (!recognition) {
+                initRecognition();
+            }
+            
+            if (!recognition) {
+                showFeedback('Speech recognition not available.', 'incorrect');
+                return;
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                // Request mic permission first
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(function(stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                            recognition.start();
+                        })
+                        .catch(function(error) {
+                            console.error('Microphone permission denied:', error);
+                            showFeedback('Microphone permission required. Please allow access.', 'incorrect');
+                        });
+                } else {
+                    recognition.start();
+                }
+            }
+        }
+
+        function evaluatePronunciation(transcript) {
+            console.log(`Evaluating: "${transcript}" for word: "${currentWord}"`);
+            
+            const expected = pronunciations[currentWord] || [currentWord];
+            const normalized = transcript.toLowerCase().trim();
+            
+            let matched = false;
+            let bestMatch = '';
+            
+            for (const variant of expected) {
+                const variantNorm = variant.toLowerCase();
+                
+                // Exact match or contains
+                if (normalized === variantNorm || 
+                    normalized.includes(variantNorm) || 
+                    variantNorm.includes(normalized)) {
+                    matched = true;
+                    bestMatch = variant;
+                    break;
+                }
+                
+                // Fuzzy matching
+                const distance = levenshteinDistance(normalized, variantNorm);
+                const threshold = Math.max(1, Math.floor(variantNorm.length * 0.4));
+                
+                if (distance <= threshold) {
+                    matched = true;
+                    bestMatch = variant;
+                    break;
+                }
+            }
+            
+            if (matched) {
+                showFeedback(`✅ Great! Recognized "${transcript}" as "${bestMatch}"`, 'correct');
+            } else {
+                showFeedback(`❌ Not quite. Heard "${transcript}". Try saying "${expected[0]}"`, 'incorrect');
+            }
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+        }
+
+        function changeWord(newWord) {
+            currentWord = newWord;
+            document.getElementById('testWord').textContent = newWord;
+            const expected = pronunciations[newWord] || [newWord];
+            document.querySelector('.word-display + div').textContent = `Expected: "${expected.join('" or "')}"`; 
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('heard').textContent = 'Heard: —';
+        }
+
+        function playAudio() {
+            // Simple text-to-speech for testing
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(currentWord);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            } else {
+                showFeedback('Text-to-speech not supported.', 'incorrect');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing...');
+            initRecognition();
+        });
+    </script>
+</body>
+</html>

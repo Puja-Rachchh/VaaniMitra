@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Level - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .category-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .category-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .level-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .level-score {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .level-score.incomplete {
+            color: #95a5a6;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .error-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.in-progress {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge.not-started {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Advanced Level</h1>
+            <p class="subtitle">Learn Basic Sentences with Pronunciation Practice</p>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <div class="levels-grid">
+            <!-- Greetings -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='greetings') }}'">
+                <div class="category-icon">👋</div>
+                <div class="category-title">Greetings</div>
+                <div class="category-description">
+                    Learn basic greetings and polite expressions
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.greetings.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.greetings.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.greetings.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.greetings.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+
+            <!-- Introductions -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='introductions') }}'">
+                <div class="category-icon">🙋</div>
+                <div class="category-title">Introductions</div>
+                <div class="category-description">
+                    Introduce yourself and talk about who you are
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.introductions.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.introductions.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.introductions.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.introductions.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+
+            <!-- Daily Activities -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='daily_activities') }}'">
+                <div class="category-icon">☀️</div>
+                <div class="category-title">Daily Activities</div>
+                <div class="category-description">
+                    Talk about your daily routine and activities
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.daily_activities.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.daily_activities.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.daily_activities.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.daily_activities.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+
+            <!-- Questions -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='questions') }}'">
+                <div class="category-icon">❓</div>
+                <div class="category-title">Common Questions</div>
+                <div class="category-description">
+                    Ask and answer basic questions in conversations
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.questions.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.questions.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.questions.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.questions.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+
+            <!-- Shopping -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='shopping') }}'">
+                <div class="category-icon">🛍️</div>
+                <div class="category-title">Shopping</div>
+                <div class="category-description">
+                    Learn useful phrases for shopping and purchases
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.shopping.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.shopping.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.shopping.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.shopping.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+
+            <!-- Directions -->
+            <div class="level-card" onclick="window.location.href='{{ url_for('advanced_level', category='directions') }}'">
+                <div class="category-icon">🗺️</div>
+                <div class="category-title">Directions</div>
+                <div class="category-description">
+                    Ask for and give directions to places
+                </div>
+                <div class="level-status">
+                    <div class="level-score {% if not progress or progress.directions.score == 0 %}incomplete{% endif %}">
+                        Score: {{ progress.directions.score if progress else 0 }}%
+                    </div>
+                    <button class="start-button">Start</button>
+                </div>
+                {% if progress and progress.directions.completed %}
+                <span class="badge completed">✓ Completed</span>
+                {% elif progress and progress.directions.score > 0 %}
+                <span class="badge in-progress">In Progress</span>
+                {% else %}
+                <span class="badge not-started">Not Started</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

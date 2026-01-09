@@ -269,6 +269,7 @@
     let didEvaluate = false;
     let gotAnyResult = false;
     let micReady = false;
+    let speechTimeout = null;
 
         // Map app language -> Web Speech recognition locale
         const recognitionLangMap = {
@@ -296,9 +297,21 @@
                 recognition = new SpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = true; // capture partials for fallback
-                // Use English recognition so learners can speak romanized letter names (aa, ee, ka, etc.)
-                // This avoids script/transliteration issues across browsers.
-                recognition.lang = 'en-US';
+                
+                // Enhanced settings for single letter recognition
+                recognition.maxAlternatives = 5; // Get more alternatives
+                if ('grammars' in recognition) {
+                    // Add common single letter sounds to grammar if supported
+                    const grammar = '#JSGF V1.0; grammar letters; public <letter> = aa | a | ii | i | uu | u | e | o | ka | kha | ga;';
+                    const speechRecognitionList = new (window.SpeechGrammarList || window.webkitSpeechGrammarList)();
+                    speechRecognitionList.addFromString(grammar, 1);
+                    recognition.grammars = speechRecognitionList;
+                }
+                
+                // Use target language recognition for better accuracy with native pronunciations
+                const targetLang = recognitionLangMap[language] || 'hi-IN';
+                recognition.lang = targetLang;
+                console.log('Using recognition language:', targetLang);
 
                 let hadError = false;
 
@@ -322,12 +335,14 @@
                     if (heardEl && heardEl.style.display !== 'none') {
                         heardEl.textContent = `Heard: ${lastTranscript || '—'}`;
                     }
-                    // Fallback: if we have any transcript but no eval yet, evaluate now
+                    
+                    // Enhanced fallback: if we have any transcript but no eval yet, evaluate now
                     if (!didEvaluate && lastTranscript) {
+                        console.log('Using fallback evaluation in onend with:', lastTranscript);
                         evaluatePronunciation(lastTranscript);
                     } else if (!didEvaluate && !hadError && !gotAnyResult) {
                         // If there was an error, onerror already showed feedback
-                        showFeedback('We could not hear you. Please try again closer to the mic.', 'incorrect');
+                        showFeedback('We could not hear you clearly. Please speak a bit louder and try again.', 'incorrect');
                     }
                 };
 
@@ -335,21 +350,50 @@
                     // Aggregate interim and final results for fallback
                     let aggregateAll = '';
                     let aggregateFinal = '';
+                    let allAlternatives = [];
+                    
                     for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const chunk = event.results[i][0].transcript || '';
+                        const result = event.results[i];
+                        const chunk = result[0].transcript || '';
                         aggregateAll += chunk + ' ';
-                        if (event.results[i].isFinal) {
+                        
+                        // Collect all alternatives for better matching
+                        for (let j = 0; j < Math.min(result.length, 5); j++) {
+                            if (result[j] && result[j].transcript) {
+                                allAlternatives.push(result[j].transcript.toLowerCase().trim());
+                            }
+                        }
+                        
+                        if (result.isFinal) {
                             aggregateFinal += chunk + ' ';
                         }
                     }
+                    
                     const allText = (aggregateAll || '').toLowerCase().trim();
                     const finalText = (aggregateFinal || '').toLowerCase().trim();
                     if (allText) { lastTranscript = allText; gotAnyResult = true; }
+                    
                     const heardEl = document.getElementById('heardText');
                     if (heardEl) heardEl.textContent = `Heard: ${finalText || allText || '—'}`;
-                    // Only evaluate once, prefer final results
-                    if (!didEvaluate && finalText) {
-                        evaluatePronunciation(finalText);
+                    
+                    // Try to evaluate with the best alternative
+                    if (!didEvaluate && (finalText || allText)) {
+                        // Try with the primary result first
+                        let bestMatch = finalText || allText;
+                        
+                        // If that fails, try alternatives
+                        if (allAlternatives.length > 0) {
+                            console.log('Speech alternatives:', allAlternatives);
+                            // Try the first alternative that seems reasonable
+                            for (const alt of allAlternatives) {
+                                if (alt && alt.length > 0 && alt.length <= 10) { // reasonable length
+                                    bestMatch = alt;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        evaluatePronunciation(bestMatch);
                         didEvaluate = true;
                     }
                 };
@@ -454,8 +498,28 @@
             const ok = await ensureMicPermission();
             if (!ok) return;
 
+            // Clear any existing timeout
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
+            }
+            
+            // Reset evaluation flags
+            didEvaluate = false;
+            gotAnyResult = false;
+            lastTranscript = '';
+
             try {
                 recognition.start();
+                
+                // Set a timeout for single letters (they're quick sounds)
+                speechTimeout = setTimeout(() => {
+                    if (isRecording && !didEvaluate) {
+                        console.log('Speech timeout - stopping recognition');
+                        try { recognition.stop(); } catch (e) {}
+                    }
+                }, 4000); // 4 seconds should be enough for single letters
+                
             } catch (e) {
                 console.error('Failed to start recognition:', e);
                 showFeedback('Could not start microphone. Please try again.', 'incorrect');
@@ -489,35 +553,86 @@
             if (item.pronunciation) variants.add(item.pronunciation);
             if (item.transliteration) variants.add(item.transliteration);
 
-            // Some basic fallback variants for common vowels
+            // Enhanced fallback variants for single letters with more phonetic alternatives
             const fallbackMap = {
-                'a': ['uh', 'ah'],
-                'aa': ['a', 'aah', 'ah'],
-                'i': ['ee', 'ih'],
-                'ii': ['ee', 'eelong'],
-                'u': ['oo', 'uh'],
-                'uu': ['oo', 'oolong'],
-                'e': ['ay'],
-                'ai': ['eye', 'ay'],
-                'o': ['oh'],
-                'au': ['ow']
+                'a': ['uh', 'ah', 'u', 'अ'],
+                'aa': ['a', 'aah', 'ah', 'आ', 'ा', 'aaa'],
+                'i': ['ee', 'ih', 'e', 'इ'],
+                'ii': ['ee', 'eelong', 'i', 'ई', 'ी'],
+                'u': ['oo', 'uh', 'o', 'उ'],
+                'uu': ['oo', 'oolong', 'u', 'ऊ', 'ू'],
+                'e': ['ay', 'eh', 'ए'],
+                'ai': ['eye', 'ay', 'aai', 'ऐ'],
+                'o': ['oh', 'ओ'],
+                'au': ['ow', 'aau', 'औ'],
+                'ri': ['ri', 'ree', 'ऋ'],
+                // consonants
+                'ka': ['kah', 'k', 'क'],
+                'kha': ['khah', 'kh', 'ख'],
+                'ga': ['gah', 'g', 'ग'],
+                'gha': ['ghah', 'gh', 'घ'],
+                'nga': ['ngah', 'ng', 'ङ'],
+                'cha': ['chah', 'ch', 'च'],
+                'chha': ['chhah', 'chh', 'छ'],
+                'ja': ['jah', 'j', 'ज'],
+                'jha': ['jhah', 'jh', 'झ'],
+                'nja': ['njah', 'nj', 'ञ']
             };
 
             const basePron = (item.pronunciation || '').toLowerCase();
             if (fallbackMap[basePron]) fallbackMap[basePron].forEach(v => variants.add(v));
 
+            // For single letters, also add common mispronunciations
+            if (basePron && basePron.length <= 3) {
+                // Add vowel sound variations
+                if (basePron === 'aa') {
+                    variants.add('a'); variants.add('aah'); variants.add('ah'); variants.add('aaah');
+                }
+                if (basePron === 'ii') {
+                    variants.add('i'); variants.add('ee'); variants.add('iii');
+                }
+                if (basePron === 'uu') {
+                    variants.add('u'); variants.add('oo'); variants.add('uuu');
+                }
+            }
+
             const normalizedTranscript = normalizeText(transcript);
             let matched = false;
             let bestVariant = '';
+            let bestScore = Infinity;
+            
             for (const v of variants) {
                 const n = normalizeText(v);
                 if (!n) continue;
-                if (normalizedTranscript.includes(n)) {
-                    matched = true; bestVariant = v; break;
+                
+                // Direct match
+                if (normalizedTranscript === n) {
+                    matched = true; 
+                    bestVariant = v; 
+                    break;
                 }
+                
+                // Substring match for very short sounds
+                if (normalizedTranscript.includes(n) || n.includes(normalizedTranscript)) {
+                    matched = true; 
+                    bestVariant = v; 
+                    break;
+                }
+                
+                // Fuzzy matching with more lenient thresholds for single letters
                 const dist = levenshteinDistance(normalizedTranscript, n);
-                const threshold = n.length <= 2 ? 1 : 2;
-                if (dist <= threshold) { matched = true; bestVariant = v; break; }
+                let threshold = 2; // default threshold
+                
+                if (n.length === 1) threshold = 1;
+                else if (n.length === 2) threshold = 1;
+                else if (n.length === 3) threshold = 2;
+                else threshold = Math.max(2, Math.floor(n.length * 0.4));
+                
+                if (dist <= threshold && dist < bestScore) {
+                    matched = true; 
+                    bestVariant = v; 
+                    bestScore = dist;
+                }
             }
 
             if (matched) {
@@ -525,7 +640,9 @@
                 showFeedback(`Great! Recognized as "${bestVariant || transcript}"`, 'correct');
                 setAdvanceAllowed(true);
             } else {
-                showFeedback(`Not quite. Heard "${transcript}". Try again or tap Listen.`, 'incorrect');
+                // More encouraging feedback for single letters
+                const suggestions = Array.from(variants).slice(0, 3).join(', ');
+                showFeedback(`Try saying "${basePron}" clearly. Expected: ${suggestions}`, 'incorrect');
                 setAdvanceAllowed(false);
             }
 

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ category_title }} - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .sentence-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .sentence-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sentence-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .sentence-content {
+            margin: 20px 0;
+        }
+
+        .english-text {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .translated-text {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+            direction: ltr;
+        }
+
+        .context-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .record-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pronunciation-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .pronunciation-result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .pronunciation-result.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            display: block;
+        }
+
+        .pronunciation-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .nav-button {
+            flex: 1;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+        }
+
+        .back-button-nav {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .back-button-nav:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .quiz-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .quiz-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #1976d2;
+        }
+
+        .listening-indicator {
+            display: none;
+            color: #667eea;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 {{ category_title }}</h1>
+            <p class="subtitle">Practice speaking and listening to sentences</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>📢 How to practice:</strong></p>
+            <p>1. Click "🔊 Listen" to hear the sentence</p>
+            <p>2. Click "🎤 Record" and speak the sentence</p>
+            <p>3. Your pronunciation will be evaluated automatically</p>
+        </div>
+
+        {% for sentence in sentences %}
+        <div class="sentence-card" id="sentence-{{ loop.index }}">
+            <div class="sentence-number">{{ loop.index }}</div>
+            
+            <span class="context-badge">{{ sentence.context }}</span>
+            
+            <div class="sentence-content">
+                <div class="english-text">{{ sentence.english }}</div>
+                <div class="translated-text" id="text-{{ loop.index }}">{{ sentence.translation }}</div>
+            </div>
+
+            <div class="audio-controls">
+                <button class="control-button" onclick="playAudio('{{ sentence.translation }}', '{{ target_language }}')">
+                    🔊 Listen
+                </button>
+                <button class="control-button record-button" id="record-btn-{{ loop.index }}" 
+                        onclick="toggleRecording({{ loop.index }}, '{{ sentence.translation }}')">
+                    🎤 Record
+                </button>
+                <span class="listening-indicator" id="listening-{{ loop.index }}">Listening...</span>
+            </div>
+
+            <div class="pronunciation-result" id="result-{{ loop.index }}">
+                <div id="feedback-{{ loop.index }}"></div>
+                <div class="score-display" id="score-{{ loop.index }}"></div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="navigation-buttons">
+            <a href="{{ url_for('advanced_levels') }}" class="nav-button back-button-nav">
+                ← Back to Levels
+            </a>
+            <a href="{{ url_for('advanced_level_quiz', category=category) }}" class="nav-button quiz-button">
+                Take Quiz →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let currentRecognition = null;
+        let isRecording = false;
+        let currentSentenceIndex = null;
+
+        // Speech Recognition Setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+        }
+
+        function playAudio(text, language) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = getLanguageCode(language);
+            utterance.rate = 0.8; // Slower speech for learning
+            speechSynthesis.speak(utterance);
+        }
+
+        function getLanguageCode(language) {
+            const langMap = {
+                'hindi': 'hi-IN',
+                'gujarati': 'gu-IN',
+                'tamil': 'ta-IN',
+                'telugu': 'te-IN',
+                'marathi': 'mr-IN',
+                'bengali': 'bn-IN',
+                'kannada': 'kn-IN',
+                'malayalam': 'ml-IN',
+                'punjabi': 'pa-IN'
+            };
+            return langMap[language.toLowerCase()] || 'hi-IN';
+        }
+
+        function toggleRecording(index, expectedText) {
+            const recordBtn = document.getElementById(`record-btn-${index}`);
+            const listeningIndicator = document.getElementById(`listening-${index}`);
+            const resultDiv = document.getElementById(`result-${index}`);
+
+            if (isRecording && currentSentenceIndex === index) {
+                // Stop recording
+                if (currentRecognition) {
+                    currentRecognition.stop();
+                }
+                isRecording = false;
+                recordBtn.classList.remove('recording');
+                recordBtn.textContent = '🎤 Record';
+                listeningIndicator.style.display = 'none';
+            } else {
+                // Start recording
+                if (currentRecognition) {
+                    currentRecognition.stop();
+                }
+
+                currentSentenceIndex = index;
+                isRecording = true;
+                recordBtn.classList.add('recording');
+                recordBtn.textContent = '⏹️ Stop';
+                listeningIndicator.style.display = 'inline';
+                resultDiv.style.display = 'none';
+
+                startRecognition(index, expectedText);
+            }
+        }
+
+        function startRecognition(index, expectedText) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = '{{ speech_lang }}';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = function(event) {
+                const recognizedText = event.results[0][0].transcript;
+                console.log('Recognized:', recognizedText);
+                evaluatePronunciation(index, recognizedText, expectedText);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                const resultDiv = document.getElementById(`result-${index}`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                
+                resultDiv.className = 'pronunciation-result error';
+                resultDiv.style.display = 'block';
+                feedbackDiv.textContent = 'Error: Could not recognize speech. Please try again.';
+                
+                resetRecordButton(index);
+            };
+
+            recognition.onend = function() {
+                resetRecordButton(index);
+            };
+
+            currentRecognition = recognition;
+            recognition.start();
+        }
+
+        function resetRecordButton(index) {
+            const recordBtn = document.getElementById(`record-btn-${index}`);
+            const listeningIndicator = document.getElementById(`listening-${index}`);
+            
+            if (recordBtn) {
+                recordBtn.classList.remove('recording');
+                recordBtn.textContent = '🎤 Record';
+            }
+            if (listeningIndicator) {
+                listeningIndicator.style.display = 'none';
+            }
+            
+            isRecording = false;
+            if (currentSentenceIndex === index) {
+                currentSentenceIndex = null;
+            }
+        }
+
+        function evaluatePronunciation(index, recognizedText, expectedText) {
+            fetch('/api/advanced/evaluate_pronunciation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    recognized_text: recognizedText,
+                    expected_text: expectedText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById(`result-${index}`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                const scoreDiv = document.getElementById(`score-${index}`);
+
+                // Determine result class based on similarity
+                if (data.similarity >= 70) {
+                    resultDiv.className = 'pronunciation-result success';
+                } else if (data.similarity >= 50) {
+                    resultDiv.className = 'pronunciation-result warning';
+                } else {
+                    resultDiv.className = 'pronunciation-result error';
+                }
+
+                feedbackDiv.innerHTML = `
+                    <strong>${data.message}</strong><br>
+                    You said: "${data.recognized}"<br>
+                    Expected: "${data.expected}"
+                `;
+                scoreDiv.textContent = `Accuracy: ${data.similarity}%`;
+                
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error evaluating pronunciation:', error);
+                const resultDiv = document.getElementById(`result-${index}`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                
+                resultDiv.className = 'pronunciation-result error';
+                resultDiv.style.display = 'block';
+                feedbackDiv.textContent = 'Error evaluating pronunciation. Please try again.';
+            });
+        }
+    </script>
+</body>
+</html>

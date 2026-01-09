@@ -297,6 +297,52 @@ def get_language_letters(target_language):
     target_language = target_language.lower() if target_language else ''
     return LANGUAGE_LETTER_SYSTEMS.get(target_language, LANGUAGE_LETTER_SYSTEMS['hindi'])
 
+# Advanced Level - Basic Sentences for Practice
+ADVANCED_LEVEL_SENTENCES = {
+    'greetings': [
+        {'english': 'Hello, how are you?', 'context': 'greeting'},
+        {'english': 'Good morning, have a nice day.', 'context': 'greeting'},
+        {'english': 'Nice to meet you.', 'context': 'greeting'},
+        {'english': 'How is your family?', 'context': 'greeting'},
+        {'english': 'Thank you very much.', 'context': 'gratitude'}
+    ],
+    'introductions': [
+        {'english': 'My name is John.', 'context': 'introduction'},
+        {'english': 'I am a student.', 'context': 'introduction'},
+        {'english': 'I live in Mumbai.', 'context': 'introduction'},
+        {'english': 'I am learning Hindi.', 'context': 'introduction'},
+        {'english': 'This is my family.', 'context': 'introduction'}
+    ],
+    'daily_activities': [
+        {'english': 'I wake up at six o\'clock.', 'context': 'daily routine'},
+        {'english': 'I eat breakfast in the morning.', 'context': 'daily routine'},
+        {'english': 'I go to school by bus.', 'context': 'daily routine'},
+        {'english': 'I study every day.', 'context': 'daily routine'},
+        {'english': 'I sleep at night.', 'context': 'daily routine'}
+    ],
+    'questions': [
+        {'english': 'What is your name?', 'context': 'question'},
+        {'english': 'Where do you live?', 'context': 'question'},
+        {'english': 'How old are you?', 'context': 'question'},
+        {'english': 'What time is it?', 'context': 'question'},
+        {'english': 'Do you speak English?', 'context': 'question'}
+    ],
+    'shopping': [
+        {'english': 'How much does this cost?', 'context': 'shopping'},
+        {'english': 'I want to buy this.', 'context': 'shopping'},
+        {'english': 'Do you have a smaller size?', 'context': 'shopping'},
+        {'english': 'Can I pay by card?', 'context': 'shopping'},
+        {'english': 'Please give me a bag.', 'context': 'shopping'}
+    ],
+    'directions': [
+        {'english': 'Where is the railway station?', 'context': 'directions'},
+        {'english': 'How do I get to the market?', 'context': 'directions'},
+        {'english': 'Is it far from here?', 'context': 'directions'},
+        {'english': 'Please turn left.', 'context': 'directions'},
+        {'english': 'Go straight ahead.', 'context': 'directions'}
+    ]
+}
+
 def get_english_vocabulary(category):
     """Get English vocabulary for a specific category"""
     return ENGLISH_BASE_VOCABULARY.get(category, [])
@@ -304,6 +350,14 @@ def get_english_vocabulary(category):
 def get_all_vocabulary_categories():
     """Get list of all available vocabulary categories"""
     return list(ENGLISH_BASE_VOCABULARY.keys())
+
+def get_advanced_sentences(category):
+    """Get English sentences for advanced level learning"""
+    return ADVANCED_LEVEL_SENTENCES.get(category, [])
+
+def get_all_sentence_categories():
+    """Get list of all available sentence categories"""
+    return list(ADVANCED_LEVEL_SENTENCES.keys())
 
 def get_translated_vocabulary(target_language, category):
     """

@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from mongodb_models import User, UserProgress, mongo
 from app import app, login_manager
 from native_content_system import get_language_letters, get_english_vocabulary, get_all_vocabulary_categories
-from indictrans2_service import translation_service
+from translation_service import translation_service
 import os
 import random
 from gtts import gTTS
@@ -318,6 +318,9 @@ def language_selection():
             elif level == 'intermediate':
                 print("Redirecting to intermediate_levels")
                 return redirect(url_for('intermediate_levels'))
+            elif level == 'advanced':
+                print("Redirecting to advanced_levels")
+                return redirect(url_for('advanced_levels'))
             print("Redirecting to home (fallback)")
             return redirect(url_for('home'))
 
@@ -591,35 +594,49 @@ def intermediate_level(level):
         print(f"  {i+1}. {item['english']} -> {item['translation']}")
     
     if level == 2:
-        print('Rendering intermediate_level2.html')
-        return render_template('intermediate_level2.html', 
-                             vocabulary=vocabulary_items, 
-                             category=category,
-                             target_language=user.target_language)
+        print('Rendering enhanced intermediate template with pronunciation for level 2')
+        return render_template('enhanced_intermediate_pronunciation.html', 
+                             level=level,
+                             level_title='Animals and Birds',
+                             target_language=user.target_language,
+                             speech_lang=get_speech_recognition_lang(user.target_language))
     elif level == 3:
-        print('Rendering intermediate_level3.html')
-        return render_template('intermediate_level3.html',
-                             vocabulary=vocabulary_items, 
-                             category=category,
-                             target_language=user.target_language)
+        print('Rendering enhanced intermediate template with pronunciation for level 3')
+        return render_template('enhanced_intermediate_pronunciation.html',
+                             level=level,
+                             level_title='Colors',
+                             target_language=user.target_language,
+                             speech_lang=get_speech_recognition_lang(user.target_language))
     elif level == 4:
-        print('Rendering intermediate_level4.html')
-        return render_template('intermediate_level4.html',
-                             vocabulary=vocabulary_items, 
-                             category=category,
-                             target_language=user.target_language)
+        print('Rendering enhanced intermediate template with pronunciation for level 4')
+        return render_template('enhanced_intermediate_pronunciation.html',
+                             level=level,
+                             level_title='Body Parts',
+                             target_language=user.target_language,
+                             speech_lang=get_speech_recognition_lang(user.target_language))
     elif level == 5:
-        print('Rendering intermediate_level5.html')
-        return render_template('intermediate_level5.html',
-                             vocabulary=vocabulary_items, 
-                             category=category,
-                             target_language=user.target_language)
+        print('Rendering enhanced intermediate template with pronunciation for level 5')
+        return render_template('enhanced_intermediate_pronunciation.html',
+                             level=level,
+                             level_title='Family Relations',
+                             target_language=user.target_language,
+                             speech_lang=get_speech_recognition_lang(user.target_language))
     
-    print(f'Rendering intermediate_level{level}.html')
-    return render_template(f'intermediate_level{level}.html',
-                         vocabulary=vocabulary_items, 
-                         category=category,
-                         target_language=user.target_language)
+    # Default case for level 1 and others
+    level_titles = {
+        1: 'Fruits and Vegetables',
+        2: 'Animals and Birds',
+        3: 'Colors',
+        4: 'Body Parts', 
+        5: 'Family Relations'
+    }
+    
+    print(f'Rendering enhanced intermediate template with pronunciation for level {level}')
+    return render_template('enhanced_intermediate_pronunciation.html',
+                         level=level,
+                         level_title=level_titles.get(level, f'Level {level}'),
+                         target_language=user.target_language,
+                         speech_lang=get_speech_recognition_lang(user.target_language))
 
 @app.route('/intermediate/<int:level>/quiz')
 def intermediate_level_quiz(level):
@@ -630,13 +647,20 @@ def intermediate_level_quiz(level):
         session.pop('user', None)
         return redirect(url_for('login'))
     
-    # Route to specific quiz pages
-    if level == 2:
-        return render_template('intermediate_level2_quiz.html')
+    # Route to all available quiz pages
+    if level == 1:
+        return render_template('intermediate_level1_quiz.html', target_language=user.target_language)
+    elif level == 2:
+        return render_template('intermediate_level2_quiz.html', target_language=user.target_language)
     elif level == 3:
-        return render_template('intermediate_level3_quiz.html')
+        return render_template('intermediate_level3_quiz.html', target_language=user.target_language)
+    elif level == 4:
+        return render_template('intermediate_level4_quiz.html', target_language=user.target_language)
+    elif level == 5:
+        return render_template('intermediate_level5_quiz.html', target_language=user.target_language)
     
-    return render_template(f'intermediate_level{level}_quiz.html')
+    # Default fallback
+    return render_template(f'intermediate_level{level}_quiz.html', target_language=user.target_language)
 
 @app.route('/update-level-score', methods=['POST'])
 def update_level_score():
@@ -674,9 +698,6 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# ============================================================================
-# ENHANCED LEVEL ROUTES WITH TRANSLATION SUPPORT
-# ============================================================================
 
 from comprehensive_vocabulary import get_vocabulary_for_level, translate_level_content
 from datetime import datetime
@@ -963,3 +984,490 @@ def user_language_preference():
     except Exception as e:
         print(f"Error handling user language preference: {e}")
         return jsonify({'error': 'Failed to handle language preference'}), 500
+
+
+def get_speech_recognition_lang(target_language):
+    """Map target language to appropriate speech recognition language code"""
+    language_mapping = {
+        'hindi': 'hi-IN',
+        'gujarati': 'gu-IN', 
+        'marathi': 'mr-IN',
+        'bengali': 'bn-IN',
+        'tamil': 'ta-IN',
+        'telugu': 'te-IN',
+        'kannada': 'kn-IN',
+        'malayalam': 'ml-IN',
+        'punjabi': 'pa-IN',
+        'urdu': 'ur-PK',
+        'assamese': 'as-IN',
+        'odia': 'hi-IN',  # Fallback to Hindi as Odia might not be supported
+        'sanskrit': 'hi-IN',  # Fallback to Hindi
+    }
+    return language_mapping.get(target_language.lower(), 'hi-IN')
+
+@app.route('/api/get-pronunciation-data', methods=['POST'])
+def get_pronunciation_data():
+    """Get pronunciation data for a word in target language"""
+    try:
+        if 'user' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user = User.find_by_username(session['user'])
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        data = request.get_json()
+        english_word = data.get('word', '')
+        target_language = data.get('language') or user.target_language
+        
+        if not english_word or not target_language:
+            return jsonify({'error': 'Missing word or language'}), 400
+        
+        # Get translation from IndicTrans2 (keeping existing translation system unchanged)
+        translated_word = translation_service.translate_text(english_word, target_language)
+        
+        # Get pronunciation from comprehensive vocabulary if available
+        from comprehensive_vocabulary import COMPREHENSIVE_VOCABULARY
+        pronunciation = ""
+        
+        # Search for the word in comprehensive vocabulary
+        for category, words in COMPREHENSIVE_VOCABULARY.items():
+            for key, word_data in words.items():
+                if word_data['english'].lower() == english_word.lower():
+                    pronunciation = word_data.get('pronunciation', '')
+                    break
+            if pronunciation:
+                break
+        
+        # If no specific pronunciation found, use the translated word as pronunciation guide
+        if not pronunciation:
+            pronunciation = translated_word
+        
+        # Generate pronunciation variants for better matching
+        variants = [
+            pronunciation.lower(),
+            translated_word.lower(),
+            english_word.lower()
+        ]
+        
+        # Add common pronunciation variations
+        if pronunciation:
+            # Remove special characters and create phonetic variants
+            clean_pronunciation = ''.join(c for c in pronunciation.lower() if c.isalpha())
+            if clean_pronunciation and clean_pronunciation != pronunciation.lower():
+                variants.append(clean_pronunciation)
+        
+        return jsonify({
+            'english': english_word,
+            'translation': translated_word,
+            'pronunciation': pronunciation,
+            'variants': list(set(variants)),  # Remove duplicates
+            'language': target_language
+        })
+        
+    except Exception as e:
+        print(f"Error getting pronunciation data: {e}")
+        return jsonify({'error': 'Failed to get pronunciation data'}), 500
+
+@app.route('/api/evaluate-pronunciation', methods=['POST'])
+def evaluate_pronunciation():
+    """Evaluate pronunciation accuracy using fuzzy matching"""
+    try:
+        if 'user' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        data = request.get_json()
+        if not data:
+            print("Error: No JSON data received")
+            return jsonify({'error': 'No data received'}), 400
+        
+        print(f"Received pronunciation evaluation request: {data}")
+        
+        spoken_text = data.get('spoken_text', '').lower().strip()
+        expected_variants = data.get('expected_variants', [])
+        
+        print(f"Spoken text: '{spoken_text}'")
+        print(f"Expected variants: {expected_variants}")
+        
+        if not spoken_text:
+            print("Error: Missing spoken text")
+            return jsonify({'error': 'Missing spoken text'}), 400
+            
+        if not expected_variants:
+            print("Error: Missing expected variants")
+            return jsonify({'error': 'Missing expected variants'}), 400
+        
+        # Calculate similarity scores against all variants
+        best_score = 0
+        best_match = ""
+        
+        for variant in expected_variants:
+            if not variant:
+                continue
+                
+            variant_lower = variant.lower().strip()
+            
+            # Exact match gets perfect score
+            if spoken_text == variant_lower:
+                best_score = 100
+                best_match = variant
+                break
+            
+            # Calculate Levenshtein distance
+            distance = levenshtein_distance(spoken_text, variant_lower)
+            max_len = max(len(spoken_text), len(variant_lower))
+            
+            if max_len == 0:
+                similarity = 100
+            else:
+                similarity = max(0, (1 - distance / max_len) * 100)
+            
+            if similarity > best_score:
+                best_score = similarity
+                best_match = variant
+        
+        # Determine feedback based on score
+        if best_score >= 85:
+            feedback = "Excellent pronunciation!"
+            status = "correct"
+        elif best_score >= 70:
+            feedback = "Good pronunciation, minor improvements needed."
+            status = "partial"
+        elif best_score >= 50:
+            feedback = "Fair pronunciation, keep practicing."
+            status = "partial"
+        else:
+            feedback = "Keep practicing! Try to match the pronunciation more closely."
+            status = "incorrect"
+        
+        return jsonify({
+            'score': round(best_score, 1),
+            'feedback': feedback,
+            'status': status,
+            'best_match': best_match,
+            'spoken': spoken_text
+        })
+        
+    except Exception as e:
+        print(f"Error evaluating pronunciation: {e}")
+        return jsonify({'error': 'Failed to evaluate pronunciation'}), 500
+
+def levenshtein_distance(s1, s2):
+    """Calculate Levenshtein distance between two strings"""
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+    
+    if len(s2) == 0:
+        return len(s1)
+    
+    prev_row = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        curr_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = prev_row[j + 1] + 1
+            deletions = curr_row[j] + 1
+            substitutions = prev_row[j] + (c1 != c2)
+            curr_row.append(min(insertions, deletions, substitutions))
+        prev_row = curr_row
+    
+    return prev_row[-1]
+
+@app.route('/api/vocabulary/<int:level>')
+def get_level_vocabulary(level):
+    """Get vocabulary for a specific intermediate level with pronunciation data"""
+    try:
+        if 'user' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user = User.find_by_username(session['user'])
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Level to category mapping
+        level_categories = {
+            1: ['fruits', 'vegetables'],
+            2: ['animals', 'birds'],
+            3: ['colors'],
+            4: ['body_parts'],
+            5: ['family_relations']
+        }
+        
+        categories = level_categories.get(level, [])
+        vocabulary_data = []
+        
+        from comprehensive_vocabulary import COMPREHENSIVE_VOCABULARY
+        
+        # Image extension mapping
+        image_extensions = {
+            # Fruits
+            'apple': 'jpeg', 'banana': 'jpg', 'cherry': 'jpeg', 'grapes': 'jpeg',
+            'kiwi': 'jpeg', 'lychee': 'jpeg', 'mango': 'jpg', 'orange': 'jpeg',
+            'papaya': 'jpeg', 'pear': 'jpeg', 'pineapple': 'jpeg', 'pomegranate': 'jpeg',
+            'strawberry': 'jpeg', 'watermelon': 'jpeg',
+            # Animals  
+            'cow': 'jpg', 'dog': 'jpg', 'cat': 'jpeg', 'horse': 'jpeg', 'elephant': 'JPG',
+            'lion': 'jpeg', 'tiger': 'jpeg', 'monkey': 'jpeg', 'bear': 'jpeg',
+            'rabbit': 'jpg', 'deer': 'jpeg', 'goat': 'jpeg', 'sheep': 'jpeg',
+            'duck': 'jpeg', 'chicken': 'jpeg', 'peacock': 'jpeg', 'parrot': 'jpeg',
+            'snake': 'jpeg', 'frog': 'jpeg', 'fish': 'jpeg', 'butterfly': 'jpeg'
+        }
+        
+        for category in categories:
+            if category in COMPREHENSIVE_VOCABULARY:
+                for key, word_data in COMPREHENSIVE_VOCABULARY[category].items():
+                    english_word = word_data['english']
+                    pronunciation = word_data.get('pronunciation', '')
+                    
+                    # Get translation using existing translation service (unchanged)
+                    try:
+                        translation = translation_service.translate_text(english_word, user.target_language)
+                    except:
+                        translation = pronunciation if pronunciation else english_word
+                    
+                    vocabulary_data.append({
+                        'english': english_word,
+                        'translation': translation,
+                        'pronunciation': pronunciation,
+                        'category': category,
+                        'image_path': f'/static/images/{category}/{english_word.lower()}.{image_extensions.get(english_word.lower(), "jpg")}'
+                    })
+        
+        return jsonify({'vocabulary': vocabulary_data})
+        
+    except Exception as e:
+        print(f"Error getting vocabulary: {e}")
+        return jsonify({'error': 'Failed to get vocabulary'}), 500
+# ==================== ADVANCED LEVEL ROUTES ====================
+
+@app.route('/advanced_levels')
+def advanced_levels():
+    """Advanced level selection page showing all sentence categories"""
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.find_by_username(session['user'])
+    if not user:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    
+    if not user.target_language or user.level != 'advanced':
+        return render_template('advanced_levels.html', 
+                             error='You must select a target language and advanced level to access this content.')
+    
+    # Get progress for each category
+    from native_content_system import get_all_sentence_categories
+    categories = get_all_sentence_categories()
+    
+    progress_data = {}
+    for category in categories:
+        progress = UserProgress.get_level_progress(user._id, f'advanced_{category}')
+        progress_data[category] = {
+            'score': int(progress.score) if progress and progress.score is not None else 0,
+            'completed': progress and progress.completed
+        }
+    
+    return render_template('advanced_levels.html',
+                         target_language=user.target_language,
+                         known_language=user.known_language,
+                         categories=categories,
+                         progress=progress_data)
+
+@app.route('/advanced/<category>')
+def advanced_level(category):
+    """Advanced level learning page for specific sentence category"""
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.find_by_username(session['user'])
+    if not user:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    
+    if not user.target_language or user.level != 'advanced':
+        return redirect(url_for('advanced_levels'))
+    
+    from native_content_system import get_advanced_sentences, get_all_sentence_categories
+    
+    # Validate category
+    valid_categories = get_all_sentence_categories()
+    if category not in valid_categories:
+        return redirect(url_for('advanced_levels'))
+    
+    # Get English sentences
+    english_sentences = get_advanced_sentences(category)
+    
+    # Translate sentences to target language
+    translated_sentences = []
+    for sentence_data in english_sentences:
+        english_text = sentence_data['english']
+        try:
+            translation = translation_service.translate_text(english_text, user.target_language)
+        except Exception as e:
+            print(f"Translation error: {e}")
+            translation = english_text
+        
+        translated_sentences.append({
+            'english': english_text,
+            'translation': translation,
+            'context': sentence_data.get('context', '')
+        })
+    
+    category_titles = {
+        'greetings': 'Greetings and Pleasantries',
+        'introductions': 'Introducing Yourself',
+        'daily_activities': 'Daily Activities',
+        'questions': 'Common Questions',
+        'shopping': 'Shopping Conversations',
+        'directions': 'Asking for Directions'
+    }
+    
+    return render_template('advanced_level.html',
+                         category=category,
+                         category_title=category_titles.get(category, category.title()),
+                         sentences=translated_sentences,
+                         target_language=user.target_language,
+                         speech_lang=get_speech_recognition_lang(user.target_language))
+
+@app.route('/advanced/<category>/quiz')
+def advanced_level_quiz(category):
+    """Quiz page for advanced level sentence category"""
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.find_by_username(session['user'])
+    if not user:
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    
+    if not user.target_language or user.level != 'advanced':
+        return redirect(url_for('advanced_levels'))
+    
+    from native_content_system import get_advanced_sentences, get_all_sentence_categories
+    
+    # Validate category
+    valid_categories = get_all_sentence_categories()
+    if category not in valid_categories:
+        return redirect(url_for('advanced_levels'))
+    
+    # Get and translate sentences for quiz
+    english_sentences = get_advanced_sentences(category)
+    translated_sentences = []
+    
+    for sentence_data in english_sentences:
+        english_text = sentence_data['english']
+        try:
+            translation = translation_service.translate_text(english_text, user.target_language)
+        except Exception as e:
+            print(f"Translation error: {e}")
+            translation = english_text
+        
+        translated_sentences.append({
+            'english': english_text,
+            'translation': translation
+        })
+    
+    category_titles = {
+        'greetings': 'Greetings and Pleasantries',
+        'introductions': 'Introducing Yourself',
+        'daily_activities': 'Daily Activities',
+        'questions': 'Common Questions',
+        'shopping': 'Shopping Conversations',
+        'directions': 'Asking for Directions'
+    }
+    
+    return render_template('advanced_level_quiz.html',
+                         category=category,
+                         category_title=category_titles.get(category, category.title()),
+                         sentences=translated_sentences,
+                         target_language=user.target_language)
+
+@app.route('/advanced/<category>/submit', methods=['POST'])
+def advanced_level_submit(category):
+    """Submit advanced level quiz results"""
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    user = User.find_by_username(session['user'])
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    try:
+        data = request.get_json()
+        score = data.get('score', 0)
+        total = data.get('total', 0)
+        
+        # Calculate percentage
+        percentage = int((score / total * 100) if total > 0 else 0)
+        
+        # Save progress
+        level_name = f'advanced_{category}'
+        UserProgress.update_or_create(
+            user_id=user._id,
+            level=level_name,
+            score=percentage,
+            completed=(percentage >= 60)
+        )
+        
+        return jsonify({
+            'success': True,
+            'score': score,
+            'total': total,
+            'percentage': percentage,
+            'passed': percentage >= 60
+        })
+        
+    except Exception as e:
+        print(f"Error submitting quiz: {e}")
+        return jsonify({'error': 'Failed to submit quiz'}), 500
+
+@app.route('/api/advanced/evaluate_pronunciation', methods=['POST'])
+def evaluate_advanced_pronunciation():
+    """Evaluate pronunciation for advanced level sentences"""
+    try:
+        if 'user' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user = User.find_by_username(session['user'])
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        data = request.get_json()
+        recognized_text = data.get('recognized_text', '').strip().lower()
+        expected_text = data.get('expected_text', '').strip().lower()
+        
+        if not recognized_text or not expected_text:
+            return jsonify({'error': 'Missing text data'}), 400
+        
+        # Calculate similarity using Levenshtein distance
+        distance = levenshtein_distance(recognized_text, expected_text)
+        max_len = max(len(recognized_text), len(expected_text))
+        
+        if max_len == 0:
+            similarity = 100
+        else:
+            similarity = int(((max_len - distance) / max_len) * 100)
+        
+        # Determine if pronunciation is acceptable
+        is_correct = similarity >= 70  # 70% similarity threshold
+        
+        feedback = {
+            'similarity': similarity,
+            'is_correct': is_correct,
+            'recognized': recognized_text,
+            'expected': expected_text
+        }
+        
+        if similarity >= 90:
+            feedback['message'] = 'Excellent pronunciation!'
+        elif similarity >= 70:
+            feedback['message'] = 'Good pronunciation!'
+        elif similarity >= 50:
+            feedback['message'] = 'Fair. Keep practicing!'
+        else:
+            feedback['message'] = 'Try again. Listen carefully and repeat.'
+        
+        return jsonify(feedback)
+        
+    except Exception as e:
+        print(f"Error evaluating pronunciation: {e}")
+        return jsonify({'error': 'Failed to evaluate pronunciation'}), 500

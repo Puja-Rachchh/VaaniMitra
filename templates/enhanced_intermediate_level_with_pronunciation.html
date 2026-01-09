@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intermediate Level {{ level }} - VaaniMitra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-description {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .vocab-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .vocab-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .vocab-word {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .vocab-english {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .vocab-pronunciation {
+            font-size: 1em;
+            color: #888;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .vocab-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            background: #ddd;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .recording-indicator {
+            display: none;
+            color: #dc3545;
+            font-weight: bold;
+            margin: 5px 0;
+            animation: pulse 1s infinite;
+            font-size: 0.9em;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .pronunciation-feedback {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .feedback-correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .heard-text {
+            font-size: 0.85em;
+            color: #666;
+            margin: 5px 0;
+            display: none;
+        }
+
+        .progress-section {
+            margin: 30px 0;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: #28a745;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .nav-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+
+        .vocabulary-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mode-selector {
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            margin: 0 10px;
+            padding: 12px 24px;
+        }
+
+        .mode-btn.active {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ level_title }}</h1>
+        <p class="level-description">{{ level_description }}</p>
+
+        <div class="mode-selector">
+            <button class="btn mode-btn active" id="learnBtn" onclick="setMode('learn')">📚 Learn</button>
+            <button class="btn mode-btn" id="practiceBtn" onclick="setMode('practice')">🎤 Practice</button>
+            <button class="btn mode-btn" id="quizBtn" onclick="setMode('quiz')">🧠 Quiz</button>
+        </div>
+
+        <!-- Learn Mode -->
+        <div id="learnMode" class="mode-content">
+            <div class="vocabulary-grid" id="vocabularyGrid">
+                <!-- Vocabulary cards will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Practice Mode -->
+        <div id="practiceMode" class="mode-content" style="display: none;">
+            <div class="progress-section">
+                <div class="score-display">
+                    Practice Score: <span id="practiceScore">0</span>/<span id="totalPracticeWords">0</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="practiceProgressBar"></div>
+                </div>
+            </div>
+
+            <div class="vocab-card" id="practiceCard">
+                <div class="vocabulary-image-container" id="practiceImageContainer"></div>
+                <div class="vocab-word" id="practiceWord">—</div>
+                <div class="vocab-english" id="practiceEnglish">Click Next to start</div>
+                <div class="vocab-pronunciation" id="practicePronunciation">—</div>
+                
+                <div class="vocab-controls">
+                    <button class="btn btn-primary" onclick="playPracticeAudio()">🔊 Listen</button>
+                    <button class="btn btn-success" id="practiceRecordBtn" onclick="startPracticeRecording()">🎤 Record</button>
+                </div>
+
+                <div class="recording-indicator" id="practiceRecordingIndicator">🎤 Listening...</div>
+                <div class="heard-text" id="practiceHeardText">Heard: —</div>
+                <div class="pronunciation-feedback" id="practiceFeedback"></div>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="previousPracticeWord()">← Previous</button>
+                <span>Word <span id="practiceCurrentIndex">1</span> of <span id="practiceTotal">0</span></span>
+                <button class="btn btn-secondary" id="practiceNextBtn" onclick="nextPracticeWord()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Quiz Mode -->
+        <div id="quizMode" class="mode-content" style="display: none;">
+            <div id="quizContent">
+                <p>Quiz feature coming soon...</p>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="{{ url_for('intermediate_levels') }}" class="btn btn-secondary nav-btn">← Back to Levels</a>
+            <a href="{{ url_for('intermediate_level_quiz', level=level) }}" class="btn btn-primary nav-btn">Take Quiz</a>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let vocabulary = [];
+        let currentMode = 'learn';
+        let practiceIndex = 0;
+        let practiceScore = 0;
+        let recognition = null;
+        let isRecording = false;
+        let practiceCompleted = new Set();
+
+        const targetLanguage = "{{ target_language }}";
+        const currentLevel = {{ level }};
+
+        // Speech recognition setup
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US'; // For romanized pronunciation
+                recognition.maxAlternatives = 3;
+
+                recognition.onstart = function() {
+                    console.log('Speech recognition started');
+                    isRecording = true;
+                    document.getElementById('practiceRecordingIndicator').style.display = 'block';
+                    document.getElementById('practiceRecordBtn').textContent = '⏹️ Stop';
+                    
+                    const heardEl = document.getElementById('practiceHeardText');
+                    heardEl.style.display = 'block';
+                    heardEl.textContent = 'Heard: Listening...';
+                };
+
+                recognition.onresult = function(event) {
+                    console.log('Speech recognition result received');
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    const displayText = finalTranscript || interimTranscript;
+                    const heardEl = document.getElementById('practiceHeardText');
+                    if (heardEl) {
+                        heardEl.textContent = `Heard: ${displayText || 'Listening...'}`;
+                    }
+                    
+                    if (finalTranscript.trim()) {
+                        console.log('Final transcript:', finalTranscript);
+                        evaluatePronunciation(finalTranscript.trim());
+                    }
+                };
+
+                recognition.onend = function() {
+                    console.log('Speech recognition ended');
+                    isRecording = false;
+                    document.getElementById('practiceRecordingIndicator').style.display = 'none';
+                    document.getElementById('practiceRecordBtn').textContent = '🎤 Record';
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    isRecording = false;
+                    document.getElementById('practiceRecordingIndicator').style.display = 'none';
+                    document.getElementById('practiceRecordBtn').textContent = '🎤 Record';
+                    
+                    let errorMessage = 'Speech recognition error. Please try again.';
+                    if (event.error === 'no-speech') {
+                        errorMessage = 'No speech detected. Please speak clearly and try again.';
+                    } else if (event.error === 'audio-capture') {
+                        errorMessage = 'Microphone not accessible. Please check your microphone.';
+                    } else if (event.error === 'not-allowed') {
+                        errorMessage = 'Microphone permission denied. Please allow microphone access.';
+                    } else if (event.error === 'network') {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    }
+                    
+                    showPracticeFeedback(errorMessage, 'incorrect');
+                };
+
+                recognition.onspeechstart = function() {
+                    console.log('Speech started');
+                };
+
+                recognition.onspeechend = function() {
+                    console.log('Speech ended');
+                };
+
+                console.log('Speech recognition initialized successfully');
+            } else {
+                console.error('Speech recognition not supported');
+                showPracticeFeedback('Speech recognition is not supported in your browser. Please use Chrome or Edge.', 'incorrect');
+            }
+        }
+
+        // Load vocabulary from server
+        async function loadVocabulary() {
+            try {
+                const response = await fetch(`/api/level-vocabulary/${currentLevel}?language=${targetLanguage}`);
+                if (response.ok) {
+                    vocabulary = await response.json();
+                    renderLearnMode();
+                    updatePracticeMode();
+                } else {
+                    console.error('Failed to load vocabulary');
+                }
+            } catch (error) {
+                console.error('Error loading vocabulary:', error);
+            }
+        }
+
+        // Render learn mode cards
+        function renderLearnMode() {
+            const grid = document.getElementById('vocabularyGrid');
+            grid.innerHTML = '';
+
+            vocabulary.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'vocab-card';
+                
+                const imageHtml = item.image_path ? 
+                    `<img src="${item.image_path}" alt="${item.english}" class="vocabulary-image">` : '';
+                
+                card.innerHTML = `
+                    ${imageHtml}
+                    <div class="vocab-word">${item.translation || item.hindi || item.english}</div>
+                    <div class="vocab-english">${item.english}</div>
+                    <div class="vocab-pronunciation">/${item.pronunciation || item.transliteration || item.english}/</div>
+                    <div class="vocab-controls">
+                        <button class="btn btn-primary" onclick="playAudio('${item.english}', ${index})">🔊 Listen</button>
+                        <button class="btn btn-success" onclick="recordPronunciation(${index})">🎤 Practice</button>
+                    </div>
+                    <div class="recording-indicator" id="recordingIndicator${index}">🎤 Listening...</div>
+                    <div class="heard-text" id="heardText${index}">Heard: —</div>
+                    <div class="pronunciation-feedback" id="feedback${index}"></div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Audio playback
+        async function playAudio(text, index) {
+            try {
+                const response = await fetch('/play_word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        word: text, 
+                        language: targetLanguage 
+                    })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    
+                    audio.play().catch(() => {
+                        showFeedback(`Autoplay blocked. Click Listen again.`, 'incorrect', index);
+                    });
+                    
+                    audio.onended = () => URL.revokeObjectURL(url);
+                } else {
+                    showFeedback('Audio not available', 'incorrect', index);
+                }
+            } catch (error) {
+                console.error('Audio error:', error);
+                showFeedback('Audio playback error', 'incorrect', index);
+            }
+        }
+
+        // Practice mode audio
+        async function playPracticeAudio() {
+            if (vocabulary[practiceIndex]) {
+                await playAudio(vocabulary[practiceIndex].english, -1);
+            }
+        }
+
+        // Record pronunciation in learn mode
+        function recordPronunciation(index) {
+            console.log(`Recording pronunciation for word ${index}`);
+            
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+
+            if (!recognition) {
+                showFeedback('Speech recognition not supported in your browser.', 'incorrect', index);
+                return;
+            }
+
+            // Create a simple recognition instance for individual words
+            const wordRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            wordRecognition.continuous = false;
+            wordRecognition.interimResults = true;
+            wordRecognition.lang = 'en-US';
+            wordRecognition.maxAlternatives = 3;
+
+            const recordingIndicator = document.getElementById(`recordingIndicator${index}`);
+            const heardText = document.getElementById(`heardText${index}`);
+            
+            wordRecognition.onstart = function() {
+                console.log(`Started recording for word ${index}`);
+                recordingIndicator.style.display = 'block';
+                heardText.style.display = 'block';
+                heardText.textContent = 'Heard: Listening...';
+            };
+
+            wordRecognition.onresult = function(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                const displayText = finalTranscript || interimTranscript;
+                heardText.textContent = `Heard: ${displayText || 'Listening...'}`;
+                
+                if (finalTranscript.trim()) {
+                    evaluateWordPronunciation(finalTranscript.trim(), index);
+                }
+            };
+
+            wordRecognition.onend = function() {
+                recordingIndicator.style.display = 'none';
+            };
+
+            wordRecognition.onerror = function(event) {
+                console.error('Word recognition error:', event.error);
+                recordingIndicator.style.display = 'none';
+                showFeedback(`Error: ${event.error}. Please try again.`, 'incorrect', index);
+            };
+
+            // Request mic permission and start
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                        wordRecognition.start();
+                    })
+                    .catch(function(error) {
+                        showFeedback('Microphone access denied. Please allow microphone.', 'incorrect', index);
+                    });
+            } else {
+                wordRecognition.start();
+            }
+        }
+
+        function evaluateWordPronunciation(transcript, index) {
+            const item = vocabulary[index];
+            if (!item) return;
+
+            const variants = [
+                item.pronunciation,
+                item.transliteration,
+                item.english
+            ].filter(v => v && v.trim()).map(v => v.toLowerCase().trim());
+
+            const normalizedTranscript = transcript.toLowerCase().trim();
+            
+            let matched = false;
+            let bestMatch = '';
+            
+            for (const variant of variants) {
+                if (normalizedTranscript === variant || 
+                    normalizedTranscript.includes(variant) || 
+                    variant.includes(normalizedTranscript) ||
+                    levenshteinDistance(normalizedTranscript, variant) <= Math.max(1, Math.floor(variant.length * 0.3))) {
+                    matched = true;
+                    bestMatch = variant;
+                    break;
+                }
+            }
+
+            if (matched) {
+                showFeedback(`Great! Recognized "${transcript}" as "${bestMatch}"`, 'correct', index);
+            } else {
+                const expectedText = variants.length > 0 ? variants[0] : item.english;
+                showFeedback(`Not quite. Heard "${transcript}". Try saying "${expectedText}".`, 'incorrect', index);
+            }
+        }
+
+        // Practice mode functions
+        function updatePracticeMode() {
+            document.getElementById('totalPracticeWords').textContent = vocabulary.length;
+            document.getElementById('practiceTotal').textContent = vocabulary.length;
+            updatePracticeDisplay();
+        }
+
+        function updatePracticeDisplay() {
+            if (vocabulary.length === 0) return;
+
+            const item = vocabulary[practiceIndex] || {};
+            
+            document.getElementById('practiceWord').textContent = item.translation || item.hindi || item.english;
+            document.getElementById('practiceEnglish').textContent = item.english || '—';
+            document.getElementById('practicePronunciation').textContent = 
+                `/${item.pronunciation || item.transliteration || item.english}/`;
+            
+            document.getElementById('practiceCurrentIndex').textContent = practiceIndex + 1;
+            
+            // Update image if available
+            const imageContainer = document.getElementById('practiceImageContainer');
+            if (item.image_path) {
+                imageContainer.innerHTML = `<img src="${item.image_path}" alt="${item.english}" class="vocabulary-image">`;
+            } else {
+                imageContainer.innerHTML = '';
+            }
+            
+            // Update progress
+            const progress = ((practiceIndex + 1) / vocabulary.length) * 100;
+            document.getElementById('practiceProgressBar').style.width = `${progress}%`;
+            
+            // Reset feedback
+            hidePracticeFeedback();
+        }
+
+        function startPracticeRecording() {
+            console.log('Starting practice recording...');
+            
+            if (!recognition) {
+                console.log('Initializing speech recognition...');
+                initSpeechRecognition();
+            }
+
+            if (!recognition) {
+                showPracticeFeedback('Speech recognition not supported in your browser.', 'incorrect');
+                return;
+            }
+
+            if (isRecording) {
+                console.log('Stopping recording...');
+                recognition.stop();
+                return;
+            }
+
+            // Request microphone permission first
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                        console.log('Microphone permission granted');
+                        // Stop the stream immediately, we just needed permission
+                        stream.getTracks().forEach(track => track.stop());
+                        
+                        // Now start speech recognition
+                        try {
+                            console.log('Starting speech recognition...');
+                            recognition.start();
+                        } catch (error) {
+                            console.error('Error starting recognition:', error);
+                            showPracticeFeedback('Could not start speech recognition. Please try again.', 'incorrect');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Microphone permission denied:', error);
+                        showPracticeFeedback('Microphone access denied. Please allow microphone and try again.', 'incorrect');
+                    });
+            } else {
+                // Fallback for browsers without getUserMedia
+                try {
+                    console.log('Starting speech recognition without permission check...');
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                    showPracticeFeedback('Could not start speech recognition. Please try again.', 'incorrect');
+                }
+            }
+        }
+
+        function evaluatePronunciation(transcript) {
+            const item = vocabulary[practiceIndex];
+            if (!item) return;
+
+            console.log(`Evaluating pronunciation: "${transcript}" for word:`, item);
+
+            // Get all possible variants to match against
+            const variants = [
+                item.pronunciation,
+                item.transliteration,
+                item.english
+            ].filter(v => v && v.trim()).map(v => v.toLowerCase().trim());
+
+            console.log('Variants to match:', variants);
+
+            const normalizedTranscript = transcript.toLowerCase().trim();
+            
+            let matched = false;
+            let bestMatch = '';
+            let bestDistance = Infinity;
+            
+            for (const variant of variants) {
+                // Exact match or contains
+                if (normalizedTranscript === variant || normalizedTranscript.includes(variant) || variant.includes(normalizedTranscript)) {
+                    matched = true;
+                    bestMatch = variant;
+                    break;
+                }
+                
+                // Fuzzy matching with Levenshtein distance
+                const distance = levenshteinDistance(normalizedTranscript, variant);
+                const threshold = Math.max(1, Math.floor(variant.length * 0.3)); // Allow 30% error
+                
+                console.log(`Distance between "${normalizedTranscript}" and "${variant}": ${distance}, threshold: ${threshold}`);
+                
+                if (distance <= threshold && distance < bestDistance) {
+                    bestDistance = distance;
+                    bestMatch = variant;
+                    matched = true;
+                }
+            }
+
+            console.log(`Match result: ${matched}, best match: "${bestMatch}"`);
+
+            if (matched) {
+                practiceScore++;
+                practiceCompleted.add(practiceIndex);
+                showPracticeFeedback(`Excellent! Recognized "${transcript}" as "${bestMatch}"`, 'correct');
+                document.getElementById('practiceScore').textContent = practiceScore;
+                
+                // Auto-advance after 2 seconds
+                setTimeout(() => {
+                    if (practiceIndex < vocabulary.length - 1) {
+                        nextPracticeWord();
+                    } else {
+                        showPracticeFeedback('🎉 Practice completed! Great job!', 'correct');
+                    }
+                }, 2000);
+            } else {
+                const expectedText = variants.length > 0 ? variants[0] : item.english;
+                showPracticeFeedback(`Not quite. Heard "${transcript}". Try saying "${expectedText}".`, 'incorrect');
+            }
+        }
+
+        function nextPracticeWord() {
+            if (practiceIndex < vocabulary.length - 1) {
+                practiceIndex++;
+                updatePracticeDisplay();
+            }
+        }
+
+        function previousPracticeWord() {
+            if (practiceIndex > 0) {
+                practiceIndex--;
+                updatePracticeDisplay();
+            }
+        }
+
+        // Utility functions
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        function showFeedback(message, type, index) {
+            const feedbackId = index >= 0 ? `feedback${index}` : 'practiceFeedback';
+            const feedback = document.getElementById(feedbackId);
+            if (feedback) {
+                feedback.textContent = message;
+                feedback.className = `pronunciation-feedback feedback-${type}`;
+                feedback.style.display = 'block';
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function showPracticeFeedback(message, type) {
+            const feedback = document.getElementById('practiceFeedback');
+            feedback.textContent = message;
+            feedback.className = `pronunciation-feedback feedback-${type}`;
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 3000);
+        }
+
+        function hidePracticeFeedback() {
+            const feedback = document.getElementById('practiceFeedback');
+            feedback.style.display = 'none';
+        }
+
+        // Mode switching
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(mode + 'Btn').classList.add('active');
+            
+            // Show/hide mode content
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(mode + 'Mode').style.display = 'block';
+            
+            if (mode === 'practice' && vocabulary.length > 0) {
+                updatePracticeDisplay();
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initSpeechRecognition();
+            loadVocabulary();
+        });
+    </script>
+</body>
+</html>
